@@ -6,26 +6,44 @@ import { deleteCategory, listCategories, upsertCategory } from "@/lib/admin.func
 import { listProducts } from "@/lib/admin.functions"; 
 import { Pencil, Plus, Trash2, X, FolderOpen, Loader2, Upload, ImageIcon } from "lucide-react";
 
+// --- 🛠️ STEP 1: Saari assets images ko top par direct import karein ---
+import colBracelets from "@/assets/col-bracelets.jpg";
+import colAnklets from "@/assets/cat-anklets.jpg"; // note: agar file name col-anklets hai toh change kar lena
+import colWishingCards from "@/assets/col-wishing-cards.jpg";
+import colNeckpieces from "@/assets/col-neckpieces.jpg";
+import colNails from "@/assets/col-nails.jpg";
+import colWaistChain from "@/assets/col-waist-chain.jpg";
+import colScrunchies from "@/assets/col-scrunchies.jpg";
+import colChocolates from "@/assets/col-chocolates.jpg";
+import colClaw from "@/assets/col-claw.jpg";
+import colEarrings from "@/assets/col-earrings.jpg";
+import colRings from "@/assets/col-rings.jpg";
+import colKeychains from "@/assets/col-keychains.jpg";
+import colBouquet from "@/assets/col-bouquet.jpg";
+import colAlbums from "@/assets/col-albums.jpg";
+import colPhoneCases from "@/assets/col-phone-cases.jpg";
+
 export const Route = createFileRoute("/_authenticated/admin/categories")({ component: CategoriesPage });
 
 const empty = { id: undefined as string | undefined, slug: "", name: "", description: "", image: "", sort_order: 0, active: true };
 
+// --- 🛠️ STEP 2: imagePath string ki jagah direct imported reference use karein ---
 const OFFICIAL_COLLECTIONS = [
-  { slug: "bracelets", name: "Bracelets", tagline: "Wrist poetry", imagePath: "../../assets/col-bracelets.jpg" },
-  { slug: "anklets", name: "Anklets", tagline: "Soft chimes of gold", imagePath: "../../assets/col-anklets.jpg" },
-  { slug: "wishing-cards", name: "Wishing Cards", tagline: "Words in gold foil", imagePath: "../../assets/col-wishing-cards.jpg" },
-  { slug: "neckpieces", name: "Neckpieces", tagline: "Layered luxury", imagePath: "../../assets/col-neckpieces.jpg" },
-  { slug: "nails", name: "Nails", tagline: "Hand-painted artistry", imagePath: "../../assets/col-nails.jpg" },
-  { slug: "waist-chain", name: "Waist Chain", tagline: "Heritage at the waist", imagePath: "../../assets/col-waist-chain.jpg" },
-  { slug: "scrunchies", name: "Scrunchies", tagline: "Everyday softness", imagePath: "../../assets/col-scrunchies.jpg" },
-  { slug: "chocolates", name: "Chocolates", tagline: "Sweet indulgence", imagePath: "../../assets/col-chocolates.jpg" },
-  { slug: "claw", name: "Claw", tagline: "Elegance, clipped", imagePath: "../../assets/col-claw.jpg" },
-  { slug: "earrings", name: "Earrings", tagline: "Framed in light", imagePath: "../../assets/col-earrings.jpg" },
-  { slug: "rings", name: "Rings", tagline: "Quiet statements", imagePath: "../../assets/col-rings.jpg" },
-  { slug: "keychains", name: "Keychains", tagline: "Little keepsakes", imagePath: "../../assets/col-keychains.jpg" },
-  { slug: "bouquet", name: "Bouquet", tagline: "Blooms that stay", imagePath: "../../assets/col-bouquet.jpg" },
-  { slug: "cards-albums", name: "Cards & Albums", tagline: "Handwritten warmth & memories, bound", imagePath: "../../assets/col-albums.jpg" },
-  { slug: "phone-cases", name: "Phone Cases", tagline: "Art in your palm", imagePath: "../../assets/col-phone-cases.jpg" }
+  { slug: "bracelets", name: "Bracelets", tagline: "Wrist poetry", image: colBracelets },
+  { slug: "anklets", name: "Anklets", tagline: "Soft chimes of gold", image: colAnklets },
+  { slug: "wishing-cards", name: "Wishing Cards", tagline: "Words in gold foil", image: colWishingCards },
+  { slug: "neckpieces", name: "Neckpieces", tagline: "Layered luxury", image: colNeckpieces },
+  { slug: "nails", name: "Nails", tagline: "Hand-painted artistry", image: colNails },
+  { slug: "waist-chain", name: "Waist Chain", tagline: "Heritage at the waist", image: colWaistChain },
+  { slug: "scrunchies", name: "Scrunchies", tagline: "Everyday softness", image: colScrunchies },
+  { slug: "chocolates", name: "Chocolates", tagline: "Sweet indulgence", image: colChocolates },
+  { slug: "claw", name: "Claw", tagline: "Elegance, clipped", image: colClaw },
+  { slug: "earrings", name: "Earrings", tagline: "Framed in light", image: colEarrings },
+  { slug: "rings", name: "Rings", tagline: "Quiet statements", image: colRings },
+  { slug: "keychains", name: "Keychains", tagline: "Little keepsakes", image: colKeychains },
+  { slug: "bouquet", name: "Bouquet", tagline: "Blooms that stay", image: colBouquet },
+  { slug: "cards-albums", name: "Cards & Albums", tagline: "Handwritten warmth & memories, bound", image: colAlbums },
+  { slug: "phone-cases", name: "Phone Cases", tagline: "Art in your palm", image: colPhoneCases }
 ];
 
 function CategoriesPage() {
@@ -65,15 +83,15 @@ function CategoriesPage() {
     if (dc && dc.slug) mergedList.push(dc);
   });
 
+  // --- 🛠️ STEP 3: URL conversion logic ko hatakar static path mapping bypass karein ---
   OFFICIAL_COLLECTIONS.forEach((sc) => {
     if (!mergedList.some((c) => c.slug === sc.slug)) {
-      const resolvedImg = new URL(sc.imagePath, import.meta.url).href;
       mergedList.push({
         id: `static-${sc.slug}`,
         slug: sc.slug,
         name: sc.name,
         description: sc.tagline,
-        image: resolvedImg,
+        image: sc.image, // Direct mapping, koi break icon nahi aayega ab
         sort_order: 10,
         active: true
       });
@@ -82,7 +100,6 @@ function CategoriesPage() {
 
   const filteredProducts = allProducts.filter((p: any) => p?.category === selectedCategorySlug);
 
-  // Securely update state with file data representation
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editing) return;
