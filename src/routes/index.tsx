@@ -301,13 +301,7 @@ function Home() {
             />
           </div>
 
-          {hisFav.length > 0 && (
-            <div className="mt-12 sm:mt-16 grid grid-cols-2 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-10">
-              {hisFav.slice(0, 4).map((p) => (
-                <ProductCard key={p.slug} product={p} dark />
-              ))}
-            </div>
-          )}
+          
         </div>
       </section>
 

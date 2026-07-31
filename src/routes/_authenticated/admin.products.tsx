@@ -32,7 +32,8 @@ const OFFICIAL_COLLECTIONS = [
   { slug: "keychains", name: "Keychains" },
   { slug: "bouquet", name: "Bouquet" },
   { slug: "cards-albums", name: "Cards & Albums" },
-  { slug: "phone-cases", name: "Phone Cases" }
+  { slug: "phone-cases", name: "Phone Cases" },
+  { slug: "his-favourites", name: "His Favourites" }
 ];
 
 function ProductsPage() {
