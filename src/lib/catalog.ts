@@ -83,11 +83,17 @@ const SELECT =
 
 
 export async function fetchAllProducts(): Promise<Product[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from("products")
     .select(SELECT)
-    .eq("active", true)
-    .order("created_at", { ascending: false });
+    .eq("active", true);
+
+  // 🔹 Agar aap chahte hain ki "His Favourites" main shop page par na dikhe, toh ye line uncheck rakhein.
+  // Jab wapas lana ho, toh is line ke aage se '//' hata dena!
+  query = query.neq("collection", "his-favourites");
+
+  const { data, error } = await query.order("created_at", { ascending: false });
+  
   if (error) throw error;
   return (data ?? []).map(mapProduct);
 }
