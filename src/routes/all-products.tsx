@@ -150,14 +150,14 @@ function AllProductsPage() {
         </div>
       </div>
 
-      {/* Products Grid */}
-      <section className="mx-auto max-w-7xl px-6 lg:px-10 py-16">
+      {/* Products Grid - Updated with grid-cols-2 for mobile view */}
+      <section className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-10 py-10 md:py-16">
         {isLoading ? (
           <p className="text-center text-muted-foreground py-24">Loading pieces…</p>
         ) : list.length === 0 ? (
           <p className="text-center text-muted-foreground py-24">No pieces match your selected filters.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-8 sm:gap-x-8 sm:gap-y-14">
             {list.map((p) => (
               <ProductCard key={p.slug} product={p} />
             ))}

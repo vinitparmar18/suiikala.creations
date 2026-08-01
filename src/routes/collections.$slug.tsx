@@ -46,7 +46,8 @@ function CollectionDetail() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 lg:px-10 py-16">
+      {/* Products Grid - Updated with grid-cols-2 for mobile view */}
+      <section className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-10 py-10 md:py-16">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
             <div className="size-8 rounded-full border-2 border-gold-brand border-t-transparent animate-spin" />
@@ -62,7 +63,7 @@ function CollectionDetail() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14 animate-fade-up">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-3 gap-y-8 sm:gap-x-8 sm:gap-y-14 animate-fade-up">
             {items.map((p) => (
               <ProductCard key={p.slug} product={p} />
             ))}
