@@ -11,8 +11,13 @@ export function ProductCard({ product, dark = false }: { product: Product; dark?
   const img = product.image || PLACEHOLDER_IMG;
 
   return (
-    <div className="group">
-      <div className="relative aspect-square overflow-hidden ring-1 ring-foreground/10 bg-muted">
+    <div className={`group flex flex-col rounded-2xl overflow-hidden transition-all duration-500 border shadow-sm hover:shadow-xl hover:-translate-y-1 ${
+      dark 
+        ? "bg-forest-brand/40 border-cream/10 hover:border-gold-brand/40" 
+        : "bg-secondary/30 border-border/70 hover:border-emerald-brand/50"
+    }`}>
+      {/* Image Container without internal clashing borders */}
+      <div className="relative aspect-square w-full overflow-hidden bg-muted">
         <Link to="/product/$slug" params={{ slug: product.slug }} className="block h-full w-full">
           <img
             src={img}
@@ -26,7 +31,7 @@ export function ProductCard({ product, dark = false }: { product: Product; dark?
 
         {product.badge && (
           <span
-            className={`absolute top-3 left-3 px-3 py-1 text-[9px] uppercase tracking-[0.18em] font-semibold ${
+            className={`absolute top-3 left-3 px-3 py-1 text-[9px] uppercase tracking-[0.18em] font-semibold rounded-md ${
               product.badge === "New"
                 ? "bg-gold-brand text-forest-brand"
                 : product.badge === "Limited"
@@ -41,7 +46,7 @@ export function ProductCard({ product, dark = false }: { product: Product; dark?
         <button
           onClick={() => toggleWishlist(product.slug)}
           aria-label="Toggle wishlist"
-          className="absolute top-3 right-3 grid place-items-center size-9 rounded-full glass hover:bg-cream transition-colors"
+          className="absolute top-3 right-3 grid place-items-center size-9 rounded-full glass hover:bg-cream transition-colors shadow-sm"
         >
           <Heart
             className={`size-4 transition-colors ${wished ? "fill-emerald-brand text-emerald-brand" : "text-forest-brand"}`}
@@ -56,7 +61,8 @@ export function ProductCard({ product, dark = false }: { product: Product; dark?
         </button>
       </div>
 
-      <div className="mt-4 flex items-start justify-between gap-4">
+      {/* Product Details Section inside the same unified card */}
+      <div className="p-4 flex items-start justify-between gap-4 flex-1">
         <div className="min-w-0">
           <h3
             className={`font-display text-[17px] leading-tight truncate ${dark ? "text-cream" : "text-forest-brand"}`}

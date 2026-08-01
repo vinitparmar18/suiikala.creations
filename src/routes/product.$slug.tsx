@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Heart, Minus, Plus, ShieldCheck, Truck, Gift, Star } from "lucide-react";
@@ -97,6 +97,7 @@ interface DBReview {
 function ProductDetail() {
   const { product } = Route.useLoaderData();
   const { addToCart, toggleWishlist, inWishlist } = useStore();
+  const navigate = useNavigate();
   const [qty, setQty] = useState(1);
   const wished = inWishlist(product.slug);
   const images = product.images && product.images.length > 0 ? product.images : [product.image || PLACEHOLDER_IMG];
@@ -162,10 +163,10 @@ function ProductDetail() {
 
     submitReviewMutation.mutate({
       product_slug: product.slug, 
-      title: reviewName,          
-      body: reviewComment,        
+      title: reviewName,           
+      body: reviewComment,         
       rating: userRating,
-      approved: true              
+      approved: true               
     });
   };
 
@@ -185,36 +186,39 @@ function ProductDetail() {
       {/* Main Content Section */}
       <section className="mx-auto max-w-7xl px-6 lg:px-10 py-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
         
-        {/* Left: Product Images (Zoom & Gallery) */}
+        {/* Left: Product Images with Clean Outer Box Border */}
         <div className="space-y-4">
-          <div
-            className="relative aspect-square overflow-hidden ring-1 ring-border bg-muted cursor-zoom-in"
-            onMouseMove={(e) => {
-              const r = e.currentTarget.getBoundingClientRect();
-              setZoom({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });
-            }}
-            onMouseLeave={() => setZoom(null)}
-          >
-            <img
-              src={activeImg}
-              alt={product.name}
-              width={1000}
-              height={1000}
-              style={
-                zoom
-                  ? { transformOrigin: `${zoom.x}% ${zoom.y}%`, transform: "scale(1.8)", transition: "transform 0.05s linear" }
-                  : { transform: "scale(1)", transition: "transform 0.25s ease" }
-              }
-              className="h-full w-full object-cover"
-            />
+          <div className="relative rounded-2xl border border-border/70 overflow-hidden bg-secondary/30 shadow-sm p-3 md:p-4">
+            <div
+              className="relative aspect-square overflow-hidden rounded-xl ring-1 ring-border bg-muted cursor-zoom-in"
+              onMouseMove={(e) => {
+                const r = e.currentTarget.getBoundingClientRect();
+                setZoom({ x: ((e.clientX - r.left) / r.width) * 100, y: ((e.clientY - r.top) / r.height) * 100 });
+              }}
+              onMouseLeave={() => setZoom(null)}
+            >
+              <img
+                src={activeImg}
+                alt={product.name}
+                width={1000}
+                height={1000}
+                style={
+                  zoom
+                    ? { transformOrigin: `${zoom.x}% ${zoom.y}%`, transform: "scale(1.8)", transition: "transform 0.05s linear" }
+                    : { transform: "scale(1)", transition: "transform 0.25s ease" }
+                }
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
+
           {images.length > 1 && (
             <div className="grid grid-cols-4 gap-3">
               {images.slice(0, 8).map((src: string, i: number) => (
                 <button
                   key={i}
                   onClick={() => setActive(i)}
-                  className={`aspect-square ring-1 overflow-hidden bg-muted transition-opacity ${
+                  className={`aspect-square ring-1 overflow-hidden rounded-xl bg-muted transition-opacity ${
                     i === active ? "ring-emerald-brand opacity-100" : "ring-border opacity-70 hover:opacity-100"
                   }`}
                 >
@@ -334,23 +338,37 @@ function ProductDetail() {
             </span>
           </div>
 
-          {/* Add to Bag / Wishlist CTA Buttons */}
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
+          {/* Add to Bag, Buy Now & Wishlist CTA Buttons */}
+          <div className="mt-8 space-y-3">
+            <div className="flex gap-3">
+              <button
+                onClick={() => addToCart(product.slug, qty)}
+                disabled={product.stock === 0}
+                className="flex-1 bg-forest-brand text-cream py-4 text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-emerald-brand transition-colors disabled:opacity-50 rounded-full shadow-luxe"
+              >
+                {product.stock === 0 ? "Out of Stock" : `Add to Bag · ${inr(product.price * qty)}`}
+              </button>
+              <button
+                onClick={() => toggleWishlist(product.slug)}
+                aria-label="Wishlist"
+                className={`grid place-items-center size-14 border rounded-full transition-colors shrink-0 shadow-sm ${
+                  wished ? "border-emerald-brand bg-emerald-brand text-cream" : "border-border hover:border-emerald-brand"
+                }`}
+              >
+                <Heart className={`size-5 ${wished ? "fill-cream" : ""}`} />
+              </button>
+            </div>
+
+            {/* Direct Buy Now Button */}
             <button
-              onClick={() => addToCart(product.slug, qty)}
+              onClick={() => {
+                addToCart(product.slug, qty);
+                navigate({ to: "/cart" });
+              }}
               disabled={product.stock === 0}
-              className="flex-1 bg-forest-brand text-cream py-4 text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-emerald-brand transition-colors disabled:opacity-50"
+              className="w-full rounded-full border-2 border-forest-brand bg-transparent py-4 text-center text-xs uppercase tracking-[0.2em] font-semibold text-forest-brand transition-all hover:bg-forest-brand hover:text-cream shadow-sm disabled:opacity-50"
             >
-              {product.stock === 0 ? "Out of Stock" : `Add to Bag · ${inr(product.price * qty)}`}
-            </button>
-            <button
-              onClick={() => toggleWishlist(product.slug)}
-              aria-label="Wishlist"
-              className={`grid place-items-center px-5 border transition-colors ${
-                wished ? "border-emerald-brand bg-emerald-brand text-cream" : "border-border hover:border-emerald-brand"
-              }`}
-            >
-              <Heart className={`size-5 ${wished ? "fill-cream" : ""}`} />
+              Buy It Now
             </button>
           </div>
 
@@ -363,7 +381,7 @@ function ProductDetail() {
             ].map(([Icon, label], i) => {
               const I = Icon as typeof Truck;
               return (
-                <div key={i} className="border border-border p-4 bg-card/30">
+                <div key={i} className="border border-border p-4 bg-card/35 rounded-xl">
                   <I className="size-4 text-gold-brand mx-auto" />
                   <p className="mt-2 text-[10px] uppercase tracking-[0.15em] text-forest-brand">{label as string}</p>
                 </div>

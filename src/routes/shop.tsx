@@ -77,20 +77,22 @@ function Shop() {
         </div>
       </section>
 
-      {/* Collection image cards */}
+      {/* Collection image cards - Structured cleanly with boxed design & smooth hover */}
       <section className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 pt-12 sm:pt-16">
         <p className="text-[10px] uppercase tracking-[0.4em] text-emerald-brand mb-6">Browse by collection</p>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
           
-          {/* "All" card same shop filter par rakha hai kyuki ye base shop page hai */}
+          {/* "All" card */}
           <Link
             to="/shop"
-            className={`group relative aspect-[4/5] overflow-hidden border transition-colors animate-fade-up grid place-items-center ${
-              filter === "all" ? "border-gold-brand bg-forest-brand" : "border-border bg-secondary hover:border-emerald-brand"
+            className={`group relative aspect-[4/5] overflow-hidden rounded-xl border transition-all duration-300 animate-fade-up grid place-items-center shadow-sm ${
+              filter === "all" 
+                ? "border-gold-brand bg-forest-brand shadow-md scale-[1.02]" 
+                : "border-border/80 bg-secondary/60 hover:border-emerald-brand hover:shadow-lg hover:-translate-y-1"
             }`}
           >
             <span
-              className={`font-display italic text-xl sm:text-2xl ${
+              className={`font-display italic text-xl sm:text-2xl transition-transform duration-300 group-hover:scale-105 ${
                 filter === "all" ? "text-cream" : "text-forest-brand"
               }`}
             >
@@ -98,34 +100,40 @@ function Shop() {
             </span>
           </Link>
 
-       
-          {collections.map((c, i) => (
-            <Link
-              key={c.slug}
-              to="/collections/$slug" 
-              params={{ slug: c.slug }} 
-              className="group relative aspect-[4/5] overflow-hidden animate-fade-up text-left block"
-              style={{ animationDelay: `${Math.min(i, 10) * 50}ms` }}
-            >
-              <img
-                src={c.image}
-                alt={c.name}
-                loading="lazy"
-                width={600}
-                height={750}
-                className="h-full w-full object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-110"
-              />
-              <span className="absolute inset-0 bg-gradient-to-t from-forest-brand/90 via-forest-brand/25 to-transparent" />
-              <span className="absolute inset-x-0 bottom-0 p-3 font-display text-sm sm:text-lg text-cream leading-tight">
-                {c.name}
-              </span>
-              <span
-                className={`pointer-events-none absolute inset-1.5 border transition-colors duration-500 ${
-                  filter === c.slug ? "border-gold-brand" : "border-gold-brand/0 group-hover:border-gold-brand/40"
+          {collections.map((c, i) => {
+            const isActive = filter === c.slug;
+            return (
+              <Link
+                key={c.slug}
+                to="/collections/$slug" 
+                params={{ slug: c.slug }} 
+                className={`group relative aspect-[4/5] overflow-hidden animate-fade-up text-left block rounded-xl border transition-all duration-500 shadow-sm ${
+                  isActive 
+                    ? "ring-2 ring-gold-brand border-gold-brand shadow-md scale-[1.02]" 
+                    : "border-border/80 bg-secondary/40 hover:border-emerald-brand/70 hover:shadow-xl hover:-translate-y-1"
                 }`}
-              />
-            </Link>
-          ))}
+                style={{ animationDelay: `${Math.min(i, 10) * 50}ms` }}
+              >
+                <img
+                  src={c.image}
+                  alt={c.name}
+                  loading="lazy"
+                  width={600}
+                  height={750}
+                  className="h-full w-full object-cover object-center transition-transform duration-[1400ms] ease-out group-hover:scale-110"
+                />
+                <span className="absolute inset-0 bg-gradient-to-t from-forest-brand/90 via-forest-brand/30 to-transparent pointer-events-none" />
+                <span className="absolute inset-x-0 bottom-0 p-3 font-display text-sm sm:text-lg text-cream leading-tight z-10">
+                  {c.name}
+                </span>
+                <span
+                  className={`pointer-events-none absolute inset-1.5 border transition-colors duration-500 rounded-lg z-20 ${
+                    isActive ? "border-gold-brand" : "border-gold-brand/0 group-hover:border-gold-brand/40"
+                  }`}
+                />
+              </Link>
+            );
+          })}
         </div>
       </section>
 
@@ -134,7 +142,7 @@ function Shop() {
           {search.budget && (
             <button
               onClick={clearBudget}
-              className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] rounded-full border border-emerald-brand text-emerald-brand"
+              className="px-4 py-2 text-[10px] uppercase tracking-[0.2em] rounded-full border border-emerald-brand text-emerald-brand bg-emerald-brand/5 hover:bg-emerald-brand hover:text-cream transition-colors"
             >
               {search.budget.replace("-", " – ")} ✕
             </button>
@@ -145,7 +153,7 @@ function Shop() {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as typeof sort)}
-            className="bg-transparent border border-border rounded-full px-4 py-2 text-xs text-forest-brand focus:outline-none focus:border-emerald-brand"
+            className="bg-transparent border border-border rounded-full px-4 py-2 text-xs text-forest-brand focus:outline-none focus:border-emerald-brand cursor-pointer"
           >
             <option value="featured">Featured</option>
             <option value="new">Newest</option>
