@@ -25,7 +25,6 @@ export type Product = {
   createdAt?: string;
 };
 
-
 export const PLACEHOLDER_IMG =
   "data:image/svg+xml;utf8," +
   encodeURIComponent(
@@ -81,15 +80,12 @@ export const mapProduct = (r: any): Product => ({
 const SELECT =
   "id, slug, name, tagline, description, material, price, compare_at, category, collection, image, images, badge, stock, rating, review_count, active, featured, new_launch, seo_title, seo_description, created_at";
 
-
 export async function fetchAllProducts(): Promise<Product[]> {
   let query = supabase
     .from("products")
     .select(SELECT)
     .eq("active", true);
 
-  // 🔹 Agar aap chahte hain ki "His Favourites" main shop page par na dikhe, toh ye line uncheck rakhein.
-  // Jab wapas lana ho, toh is line ke aage se '//' hata dena!
   query = query.neq("collection", "his-favourites");
 
   const { data, error } = await query.order("created_at", { ascending: false });
@@ -120,7 +116,6 @@ export async function fetchProductsByCollection(slug: string): Promise<Product[]
   return (data ?? []).map(mapProduct);
 }
 
-/** Products the admin has flagged as a New Launch. */
 export async function fetchNewLaunches(limit = 8): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
@@ -133,7 +128,6 @@ export async function fetchNewLaunches(limit = 8): Promise<Product[]> {
   return (data ?? []).map(mapProduct);
 }
 
-/** Live product counts keyed by collection slug (used on the collection cards). */
 export async function fetchCollectionCounts(): Promise<Record<string, number>> {
   const { data, error } = await supabase
     .from("products")
@@ -148,7 +142,6 @@ export async function fetchCollectionCounts(): Promise<Record<string, number>> {
   return counts;
 }
 
-/** Distinct category names present in the live catalogue. */
 export async function fetchCategoryNames(): Promise<string[]> {
   const { data, error } = await supabase.from("products").select("category").eq("active", true);
   if (error) throw error;
@@ -159,7 +152,6 @@ export async function fetchCategoryNames(): Promise<string[]> {
   }
   return [...set].sort((a, b) => a.localeCompare(b));
 }
-
 
 export async function fetchProductsBySlugs(slugs: string[]): Promise<Product[]> {
   if (slugs.length === 0) return [];
@@ -182,7 +174,7 @@ export async function fetchFeatured(limit = 8): Promise<Product[]> {
   if (error) throw error;
   const rows = data ?? [];
   if (rows.length > 0) return rows.map(mapProduct);
-  // fallback: top rated
+  
   const { data: fallback } = await supabase
     .from("products")
     .select(SELECT)

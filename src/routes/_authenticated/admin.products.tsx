@@ -12,11 +12,12 @@ const empty = {
   id: undefined as string | undefined,
   slug: "", name: "", tagline: "", description: "", material: "",
   price: 0, compare_at: null as number | null, category: "", collection: "",
+  collections: [] as string[], // 🔹 Multi-collection support array
   image: "", images: [] as string[], badge: "", stock: 0, active: true, featured: false, new_launch: false,
   seo_title: "", seo_description: "",
 };
 
-// 📦 Aapke pure system ki exact categories (URL & Slugs ke sath mapping done)
+// 📦 Official Collections for multi-selection
 const OFFICIAL_COLLECTIONS = [
   { slug: "bracelets", name: "Bracelets" },
   { slug: "anklets", name: "Anklets" },
@@ -33,7 +34,8 @@ const OFFICIAL_COLLECTIONS = [
   { slug: "bouquet", name: "Bouquet" },
   { slug: "cards-albums", name: "Cards & Albums" },
   { slug: "phone-cases", name: "Phone Cases" },
-  { slug: "his-favourites", name: "His Favourites" }
+  { slug: "his-favourites", name: "His Favourites" },
+  { slug: "desi-diva", name: "Desi Diva" }
 ];
 
 function ProductsPage() {
@@ -69,7 +71,7 @@ function ProductsPage() {
         {isLoading ? <p className="p-6 text-cream/60">Loading…</p> : (
           <table className="w-full text-sm">
             <thead className="text-[10px] uppercase tracking-widest text-cream/50 bg-black/20">
-              <tr><th className="text-left p-4">Product</th><th className="text-left">Category</th><th className="text-right">Price</th><th className="text-right">Stock</th><th className="text-center">Status</th><th></th></tr>
+              <tr><th className="text-left p-4">Product</th><th className="text-left">Category / Collections</th><th className="text-right">Price</th><th className="text-right">Stock</th><th className="text-center">Status</th><th></th></tr>
             </thead>
             <tbody className="divide-y divide-white/5">
               {data.map((p: any) => (
@@ -83,12 +85,19 @@ function ProductsPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="text-cream/70 font-mono text-xs">{p.category}</td>
+                  <td className="text-cream/70 font-mono text-xs">
+                    <div>{p.category}</div>
+                    {p.collections && p.collections.length > 0 && (
+                      <div className="text-[10px] text-gold-brand/80 mt-0.5">
+                        {p.collections.join(", ")}
+                      </div>
+                    )}
+                  </td>
                   <td className="text-right font-medium text-gold-brand">₹{p.price.toLocaleString("en-IN")}</td>
                   <td className={`text-right ${p.stock < 5 ? "text-red-400" : ""}`}>{p.stock}</td>
                   <td className="text-center"><span className={`inline-block px-2 py-1 rounded text-[10px] uppercase tracking-wider ${p.active ? "bg-emerald-brand/30 text-emerald-100" : "bg-white/10 text-cream/50"}`}>{p.active ? "Live" : "Draft"}</span></td>
                   <td className="text-right p-4 space-x-2">
-                    <button onClick={() => setEditing({ ...empty, ...p, images: p.images ?? [] })} className="p-2 text-cream/70 hover:text-gold-brand"><Pencil className="size-4" /></button>
+                    <button onClick={() => setEditing({ ...empty, ...p, images: p.images ?? [], collections: p.collections ?? (p.collection ? [p.collection] : []) })} className="p-2 text-cream/70 hover:text-gold-brand"><Pencil className="size-4" /></button>
                     <button onClick={() => confirm("Delete product?") && del.mutate(p.id)} className="p-2 text-cream/70 hover:text-red-400"><Trash2 className="size-4" /></button>
                   </td>
                 </tr>
@@ -99,7 +108,6 @@ function ProductsPage() {
         )}
       </div>
 
-      {/* 🛠️ Fix: passing save.mutate instead of undefined onSave */}
       {editing && <ProductModal product={editing} onClose={() => setEditing(null)} onSave={(p) => save.mutate(p)} saving={save.isPending} />}
     </div>
   );
@@ -109,6 +117,19 @@ function ProductModal({ product, onClose, onSave, saving }: { product: typeof em
   const [f, setF] = useState(product);
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }));
   
+  const toggleCollection = (slug: string) => {
+    const current = f.collections || [];
+    const next = current.includes(slug)
+      ? current.filter((s) => s !== slug)
+      : [...current, slug];
+    set("collections", next);
+    // Primary collection ko bhi sync rakhne ke liye pehla item set kar sakte hain
+    if (next.length > 0) {
+      set("collection", next[0]);
+      set("category", next[0]);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-forest-brand border border-gold-brand/30 rounded-2xl max-w-2xl w-full my-8 max-h-[90vh] overflow-y-auto">
@@ -139,23 +160,27 @@ function ProductModal({ product, onClose, onSave, saving }: { product: typeof em
           <Field label="Price (₹)"><input type="number" value={f.price} onChange={(e) => set("price", +e.target.value)} className={input} /></Field>
           <Field label="Compare-at (₹)"><input type="number" value={f.compare_at ?? ""} onChange={(e) => set("compare_at", e.target.value ? +e.target.value : null)} className={input} /></Field>
           
-          <Field label="Category & Collection">
-            <select
-              value={f.category ?? ""}
-              onChange={(e) => {
-                const selectedSlug = e.target.value;
-                set("category", selectedSlug);
-                set("collection", selectedSlug);
-              }}
-              className={`${input} appearance-none cursor-pointer`}
-            >
-              <option value="" className="bg-forest-brand text-cream/40">Select Collection</option>
-              {OFFICIAL_COLLECTIONS.map((col) => (
-                <option key={col.slug} value={col.slug} className="bg-forest-brand text-cream">
-                  {col.name} ({col.slug})
-                </option>
-              ))}
-            </select>
+          {/* 🔹 Multi-Select Checkboxes for Collections */}
+          <Field label="Show in Collections (Select multiple)" full>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-black/20 p-3 rounded-lg border border-white/10 max-h-48 overflow-y-auto">
+              {OFFICIAL_COLLECTIONS.map((col) => {
+                const isSelected = (f.collections || []).includes(col.slug);
+                return (
+                  <label 
+                    key={col.slug} 
+                    className={`flex items-center gap-2 p-2 rounded cursor-pointer text-xs transition ${isSelected ? 'bg-gold-brand/20 text-gold-light border border-gold-brand/40' : 'hover:bg-white/5 text-cream/80'}`}
+                  >
+                    <input 
+                      type="checkbox" 
+                      checked={isSelected} 
+                      onChange={() => toggleCollection(col.slug)}
+                      className="rounded border-white/20 bg-black/40 text-gold-brand focus:ring-0"
+                    />
+                    <span className="truncate">{col.name}</span>
+                  </label>
+                );
+              })}
+            </div>
           </Field>
 
           <Field label="Stock"><input type="number" value={f.stock} onChange={(e) => set("stock", +e.target.value)} className={input} /></Field>

@@ -6,7 +6,6 @@ import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { ProductCard } from "@/components/product-card";
 import { CollectionGrid } from "@/components/collection-cards";
-import { GIFT_HAMPERS } from "@/lib/collections";
 import {
   fetchFeatured,
   fetchNewArrivals,
@@ -157,12 +156,12 @@ function Home() {
       </section>
 
       {/* Section 1 — Best Sellers */}
-      <SliderSection eyebrow="House Favourites" title="Best Sellers" items={bestsellers} cta={{ to: "/shop", label: "Shop all bestsellers" }} />
+      <SliderSection eyebrow="" title="Best Sellers" items={bestsellers} cta={{ to: "/shop", label: "Shop all bestsellers" }} />
 
       {/* Section 2 — New Launches */}
       {newLaunches.length > 0 && (
         <SliderSection
-          eyebrow="Fresh off the studio table"
+          eyebrow=""
           title="New Launches"
           items={newLaunches}
           cta={{ to: "/collections/$slug", params: { slug: "new-launches" }, label: "See all new launches" }}
@@ -172,7 +171,7 @@ function Home() {
 
       {/* Section 3 — New Arrivals */}
       <SliderSection
-        eyebrow="Just In"
+        eyebrow=""
         title="New Arrivals"
         items={newArrivals}
         cta={{ to: "/shop", label: "See what's new" }}
@@ -184,7 +183,7 @@ function Home() {
         <div className="mx-auto max-w-7xl">
           <div className="flex items-end justify-between mb-10 sm:mb-12 gap-4 sm:gap-6 flex-wrap">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.4em] text-emerald-brand mb-3">The Edit</p>
+              <p className="text-[10px] uppercase tracking-[0.4em] text-emerald-brand mb-3"></p>
               <h2 className="font-display italic text-3xl sm:text-4xl md:text-5xl text-forest-brand">Our Collections</h2>
             </div>
             <div className="hidden md:block flex-1 gold-divider mb-4" />
@@ -269,53 +268,28 @@ function Home() {
         </div>
       </section>
 
-      {/* Section 7 — His Favourite */}
-      <SliderSection
+      {/* Container with spacing and border between His Favourite & Desi Diva */}
+      <div className="my-12 sm:my-16 border-t border-gold-brand/30" />
+
+      {/* Section 7 — His Favourite with Background Image */}
+      <BackgroundImageSliderSection
         eyebrow="Curated for him"
         title="His Favourite ❤️"
         items={hisFav}
+        bgImg={hisFavImg}
         cta={{ to: "/collections/$slug", params: { slug: "his-favourites" }, label: "View All Collection" }}
-        alt
       />
 
-      {/* Section 8 — Desi Diva Collection */}
-      <section className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 py-16 sm:py-24">
-        <div className="relative overflow-hidden bg-forest-brand grain text-cream min-h-[360px] sm:min-h-[460px] flex items-center p-8 sm:p-12 md:p-20 border border-gold-brand/30">
-          <img
-            src={desiDivaImg}
-            alt=""
-            loading="lazy"
-            width={1600}
-            height={1200}
-            className="absolute inset-0 h-full w-full object-cover opacity-70 md:opacity-90"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-forest-brand via-forest-brand/80 to-forest-brand/20" />
-          <div className="relative z-10 max-w-xl animate-reveal">
-            <p className="text-[10px] uppercase tracking-[0.4em] text-gold-brand mb-4">Signature Edit</p>
-            <h3 className="font-display italic text-3xl sm:text-5xl md:text-6xl leading-[1.05]">
-              Desi Diva
-              <br />
-              <span className="text-gold-shimmer">Collection</span>
-            </h3>
-            <Link
-              to="/collections/$slug"
-              params={{ slug: "desi-diva" }}
-              className="mt-8 sm:mt-10 inline-flex items-center gap-3 bg-gold-brand text-forest-brand px-7 sm:px-8 py-4 text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-gold-light transition-colors"
-            >
-              Discover the edit <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </div>
-        {desiDiva.length > 0 && (
-          <div className="mt-12 sm:mt-14 grid grid-cols-2 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-8 sm:gap-y-10">
-            {desiDiva.slice(0, 4).map((p) => (
-              <div key={p.slug} className="border border-forest-brand/10 p-2 transition-all duration-300 hover:border-gold-brand">
-                <ProductCard product={p} />
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+      <div className="my-12 sm:my-16 border-t border-gold-brand/30" />
+
+      {/* Section 8 — Desi Diva Collection with Background Image */}
+      <BackgroundImageSliderSection
+        eyebrow="The Traditional Edit"
+        title="Desi Diva Collection"
+        items={desiDiva}
+        bgImg={desiDivaImg}
+        cta={{ to: "/collections/$slug", params: { slug: "desi-diva" }, label: "View All Collection" }}
+      />
 
       <SiteFooter />
     </div>
@@ -353,9 +327,11 @@ function SliderSection({
       <div className="mx-auto max-w-7xl">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-12 gap-4">
           <div>
-            <p className={`text-[10px] uppercase tracking-[0.4em] mb-3 ${alt ? "text-gold-brand" : "text-emerald-brand"}`}>
-              {eyebrow}
-            </p>
+            {eyebrow && (
+              <p className={`text-[10px] uppercase tracking-[0.4em] mb-3 ${alt ? "text-gold-brand" : "text-emerald-brand"}`}>
+                {eyebrow}
+              </p>
+            )}
             <h2 className={`font-display italic text-3xl sm:text-4xl md:text-5xl ${alt ? "text-cream" : "text-forest-brand"}`}>
               {title}
             </h2>
@@ -384,11 +360,7 @@ function SliderSection({
               onClick={() => scroll("left")}
               aria-label="Scroll Left"
               type="button"
-              className={`absolute -left-3 sm:-left-6 top-1/2 -translate-y-1/2 z-30 size-11 sm:size-12 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 opacity-90 hover:opacity-100 hover:scale-110 cursor-pointer ${
-                alt
-                  ? "bg-forest-brand text-gold-brand border border-gold-brand/60 hover:bg-gold-brand hover:text-forest-brand"
-                  : "bg-cream text-forest-brand border border-forest-brand/25 hover:bg-forest-brand hover:text-cream"
-              }`}
+              className="absolute -left-3 sm:-left-6 top-1/2 -translate-y-1/2 z-30 size-11 sm:size-12 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 opacity-90 hover:opacity-100 hover:scale-110 cursor-pointer bg-forest-brand text-gold-brand border border-gold-brand/60 hover:bg-gold-brand hover:text-forest-brand"
             >
               <ChevronLeft className="size-6" />
             </button>
@@ -398,11 +370,7 @@ function SliderSection({
               onClick={() => scroll("right")}
               aria-label="Scroll Right"
               type="button"
-              className={`absolute -right-3 sm:-right-6 top-1/2 -translate-y-1/2 z-30 size-11 sm:size-12 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 opacity-90 hover:opacity-100 hover:scale-110 cursor-pointer ${
-                alt
-                  ? "bg-forest-brand text-gold-brand border border-gold-brand/60 hover:bg-gold-brand hover:text-forest-brand"
-                  : "bg-cream text-forest-brand border border-forest-brand/25 hover:bg-forest-brand hover:text-cream"
-              }`}
+              className="absolute -right-3 sm:-right-6 top-1/2 -translate-y-1/2 z-30 size-11 sm:size-12 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 opacity-90 hover:opacity-100 hover:scale-110 cursor-pointer bg-forest-brand text-gold-brand border border-gold-brand/60 hover:bg-gold-brand hover:text-forest-brand"
             >
               <ChevronRight className="size-6" />
             </button>
@@ -416,13 +384,119 @@ function SliderSection({
                 {items.map((p) => (
                   <div
                     key={p.slug}
-                    className={`snap-start shrink-0 w-[220px] sm:w-[300px] lg:w-[320px] p-2.5 transition-all duration-500 border ${
-                      alt
-                        ? "border-gold-brand/20 bg-forest-brand/40 hover:border-gold-brand shadow-lg"
-                        : "border-forest-brand/10 bg-background hover:border-gold-brand shadow-sm"
-                    }`}
+                    className="snap-start shrink-0 w-[220px] sm:w-[300px] lg:w-[320px] p-2.5 transition-all duration-500 border border-gold-brand/20 bg-forest-brand/40 hover:border-gold-brand shadow-lg"
                   >
                     <ProductCard product={p} dark={alt} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function BackgroundImageSliderSection({
+  eyebrow,
+  title,
+  items,
+  bgImg,
+  cta,
+}: {
+  eyebrow: string;
+  title: string;
+  items: Product[];
+  bgImg: string;
+  cta?: { to: string; label: string; params?: Record<string, string> };
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollAmount = clientWidth * 0.75;
+      scrollRef.current.scrollTo({
+        left: direction === "left" ? scrollLeft - scrollAmount : scrollLeft + scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return (
+    <section className="py-16 sm:py-24 px-5 sm:px-6 lg:px-10 relative overflow-hidden bg-forest-brand text-cream border-y border-gold-brand/20">
+      {/* Background Image with Gradient Overlay */}
+      <div className="absolute inset-0 grain opacity-40 pointer-events-none" />
+      <img
+        src={bgImg}
+        alt=""
+        loading="lazy"
+        width={1600}
+        height={1200}
+        className="absolute inset-0 h-full w-full object-cover opacity-25"
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-forest-brand via-forest-brand/90 to-forest-brand/70" />
+
+      <div className="relative z-10 mx-auto max-w-7xl">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 sm:mb-12 gap-4">
+          <div>
+            {eyebrow && (
+              <p className="text-[10px] uppercase tracking-[0.4em] mb-3 text-gold-brand">
+                {eyebrow}
+              </p>
+            )}
+            <h2 className="font-display italic text-3xl sm:text-4xl md:text-5xl text-cream">
+              {title}
+            </h2>
+          </div>
+          {cta && (
+            <Link
+              to={cta.to as never}
+              params={cta.params as never}
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3 text-[10px] uppercase tracking-[0.2em] font-semibold border transition-all duration-300 w-fit bg-gold-brand/15 text-gold-brand border-gold-brand/40 hover:bg-gold-brand hover:text-forest-brand"
+            >
+              {cta.label} <ArrowUpRight className="size-3.5" />
+            </Link>
+          )}
+        </div>
+
+        {items.length === 0 ? (
+          <p className="py-8 text-sm text-cream/60">New pieces coming soon.</p>
+        ) : (
+          <div className="relative group">
+            {/* Left Arrow Button */}
+            <button
+              onClick={() => scroll("left")}
+              aria-label="Scroll Left"
+              type="button"
+              className="absolute -left-3 sm:-left-6 top-1/2 -translate-y-1/2 z-30 size-11 sm:size-12 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 opacity-90 hover:opacity-100 hover:scale-110 cursor-pointer bg-forest-brand text-gold-brand border border-gold-brand/60 hover:bg-gold-brand hover:text-forest-brand"
+            >
+              <ChevronLeft className="size-6" />
+            </button>
+
+            {/* Right Arrow Button */}
+            <button
+              onClick={() => scroll("right")}
+              aria-label="Scroll Right"
+              type="button"
+              className="absolute -right-3 sm:-right-6 top-1/2 -translate-y-1/2 z-30 size-11 sm:size-12 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 opacity-90 hover:opacity-100 hover:scale-110 cursor-pointer bg-forest-brand text-gold-brand border border-gold-brand/60 hover:bg-gold-brand hover:text-forest-brand"
+            >
+              <ChevronRight className="size-6" />
+            </button>
+
+            {/* Slider Track assigned with scrollRef */}
+            <div className="relative -mx-5 sm:-mx-6 lg:-mx-10 overflow-hidden">
+              <div
+                ref={scrollRef}
+                className="flex gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory px-5 sm:px-6 lg:px-10 pb-6 pt-2 scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {items.map((p) => (
+                  <div
+                    key={p.slug}
+                    className="snap-start shrink-0 w-[220px] sm:w-[300px] lg:w-[320px] p-2.5 transition-all duration-500 border border-gold-brand/20 bg-forest-brand/50 hover:border-gold-brand shadow-lg"
+                  >
+                    <ProductCard product={p} dark={true} />
                   </div>
                 ))}
               </div>

@@ -1,14 +1,13 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Heart, Minus, Plus, ShieldCheck, Truck, Gift, Star } from "lucide-react";
+import { Heart, Minus, Plus, ShieldCheck, Truck, Gift, Star, Check, X, LogIn } from "lucide-react";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { ProductCard } from "@/components/product-card";
 import { fetchProductBySlug, fetchAllProducts, PLACEHOLDER_IMG } from "@/lib/catalog";
 import { inr } from "@/lib/products";
 import { useStore } from "@/lib/store";
-
 import { supabase } from "../lib/supabase";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -109,6 +108,20 @@ function ProductDetail() {
   const [reviewComment, setReviewComment] = useState("");
   const [userRating, setUserRating] = useState(5);
 
+  // UI feedback states
+  const [isAdded, setIsAdded] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Check user session on mount
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        setCurrentUser(data.user);
+      }
+    });
+  }, []);
+
   const queryClient = useQueryClient();
 
   const { data: dbReviews = [], refetch: refetchReviews } = useQuery<DBReview[]>({
@@ -157,22 +170,99 @@ function ProductDetail() {
       ? dbReviews.reduce((acc, r) => acc + r.rating, 0) / totalReviewsCount
       : (product.rating || 0);
 
+  // Auth Guard Helper
+  const requireAuthAndExecute = (action: () => void) => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      return;
+    }
+    action();
+  };
+
+  const handleAddToCart = () => {
+    requireAuthAndExecute(() => {
+      addToCart(product.slug, qty);
+      setIsAdded(true);
+      setTimeout(() => setIsAdded(false), 2500);
+    });
+  };
+
+  const handleBuyNow = () => {
+    requireAuthAndExecute(() => {
+      addToCart(product.slug, qty);
+      navigate({ to: "/cart" });
+    });
+  };
+
+  const handleWishlistToggle = () => {
+    requireAuthAndExecute(() => {
+      toggleWishlist(product.slug);
+    });
+  };
+
+  const handleReviewClick = () => {
+    requireAuthAndExecute(() => {
+      setShowReviewForm(!showReviewForm);
+    });
+  };
+
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewName.trim() || !reviewComment.trim()) return;
 
     submitReviewMutation.mutate({
       product_slug: product.slug, 
-      title: reviewName,           
-      body: reviewComment,         
+      title: reviewName,            
+      body: reviewComment,        
       rating: userRating,
-      approved: true               
+      approved: true                
     });
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <SiteNav />
+
+      {/* Large Center Login Required Modal Popup */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-card border-2 border-emerald-brand/30 rounded-3xl max-w-lg w-full p-8 shadow-2xl relative text-center">
+            <button 
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-5 right-5 text-muted-foreground hover:text-forest-brand p-2 rounded-full hover:bg-secondary transition-colors"
+            >
+              <X className="size-6" />
+            </button>
+            
+            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-brand/10 text-emerald-brand mb-5 shadow-inner">
+              <LogIn className="size-8" />
+            </div>
+
+            <h3 className="font-display italic text-3xl text-forest-brand">Authentication Required</h3>
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
+              Please sign in or create an account to add items to your cart, manage your wishlist, or share your feedback.
+            </p>
+
+            <div className="mt-8 flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className="flex-1 py-3.5 rounded-full border border-border text-xs uppercase tracking-widest text-muted-foreground hover:text-forest-brand font-semibold transition-colors"
+              >
+                Continue Browsing
+              </button>
+              <button
+                onClick={() => {
+                  setShowAuthModal(false);
+                  navigate({ to: "/auth" });
+                }}
+                className="flex-1 py-3.5 rounded-full bg-forest-brand text-cream text-xs uppercase tracking-widest font-semibold hover:bg-emerald-brand transition-all shadow-luxe"
+              >
+                Sign In Now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Breadcrumb Navigation */}
       <div className="mx-auto max-w-7xl px-6 lg:px-10 pt-8 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
@@ -186,7 +276,7 @@ function ProductDetail() {
       {/* Main Content Section */}
       <section className="mx-auto max-w-7xl px-6 lg:px-10 py-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
         
-        {/* Left: Product Images with Clean Outer Box Border */}
+        {/* Left: Product Images */}
         <div className="space-y-4">
           <div className="relative rounded-2xl border border-border/70 overflow-hidden bg-secondary/30 shadow-sm p-3 md:p-4">
             <div
@@ -254,14 +344,14 @@ function ProductDetail() {
             
             <button 
               type="button"
-              onClick={() => setShowReviewForm(!showReviewForm)}
+              onClick={handleReviewClick}
               className="text-[10px] font-semibold text-emerald-brand underline tracking-wider uppercase hover:text-forest-brand transition-colors"
             >
               {showReviewForm ? "Cancel Review" : "Write a Review"}
             </button>
           </div>
 
-          {/* Write a Review Block form */}
+          {/* Write a Review Form Block */}
           {showReviewForm && (
             <form onSubmit={handleReviewSubmit} className="mt-4 border border-border p-4 bg-card/40 rounded space-y-3">
               <p className="text-[10px] font-bold uppercase tracking-wider text-forest-brand">Give your Rating:</p>
@@ -342,14 +432,24 @@ function ProductDetail() {
           <div className="mt-8 space-y-3">
             <div className="flex gap-3">
               <button
-                onClick={() => addToCart(product.slug, qty)}
+                onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className="flex-1 bg-forest-brand text-cream py-4 text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-emerald-brand transition-colors disabled:opacity-50 rounded-full shadow-luxe"
+                className={`flex-1 py-4 text-[11px] uppercase tracking-[0.2em] font-semibold transition-all rounded-full shadow-luxe flex items-center justify-center gap-2 ${
+                  isAdded 
+                    ? "bg-[#062c1e] text-amber-100 ring-2 ring-emerald-600 shadow-lg scale-[1.01]" // Professional deep dark rich success state
+                    : "bg-forest-brand text-cream hover:bg-emerald-brand"
+                } disabled:opacity-50`}
               >
-                {product.stock === 0 ? "Out of Stock" : `Add to Bag · ${inr(product.price * qty)}`}
+                {product.stock === 0 ? (
+                  "Out of Stock"
+                ) : isAdded ? (
+                  <>Added to Bag <Check className="size-4 animate-bounce text-emerald-400" /></>
+                ) : (
+                  `Add to Bag · ${inr(product.price * qty)}`
+                )}
               </button>
               <button
-                onClick={() => toggleWishlist(product.slug)}
+                onClick={handleWishlistToggle}
                 aria-label="Wishlist"
                 className={`grid place-items-center size-14 border rounded-full transition-colors shrink-0 shadow-sm ${
                   wished ? "border-emerald-brand bg-emerald-brand text-cream" : "border-border hover:border-emerald-brand"
@@ -361,10 +461,7 @@ function ProductDetail() {
 
             {/* Direct Buy Now Button */}
             <button
-              onClick={() => {
-                addToCart(product.slug, qty);
-                navigate({ to: "/cart" });
-              }}
+              onClick={handleBuyNow}
               disabled={product.stock === 0}
               className="w-full rounded-full border-2 border-forest-brand bg-transparent py-4 text-center text-xs uppercase tracking-[0.2em] font-semibold text-forest-brand transition-all hover:bg-forest-brand hover:text-cream shadow-sm disabled:opacity-50"
             >
@@ -389,11 +486,10 @@ function ProductDetail() {
             })}
           </div>
 
-          {/* Dynamic Specifications & Supabase Reviews Loop */}
+          {/* Specifications & Supabase Reviews */}
           <div className="mt-8 space-y-4">
             {product.material && <Section title="Materials">{product.material}</Section>}
             
-            {/* Supabase Dynamic Layout Review Feedbacks */}
             {dbReviews.length > 0 && (
               <Section title={`Customer Feedbacks (${dbReviews.length})`}>
                 <div className="space-y-4 max-h-60 overflow-y-auto pr-1">

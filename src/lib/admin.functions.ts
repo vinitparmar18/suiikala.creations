@@ -61,6 +61,7 @@ const ProductSchema = z.object({
   compare_at: z.number().int().nullable().optional(),
   category: z.string().optional().nullable(),
   collection: z.string().optional().nullable(),
+  collections: z.array(z.string()).default([]), // 🔹 Multi-collections array support
   image: z.string().optional().nullable(),
   images: z.array(z.string()).default([]),
   badge: z.string().optional().nullable(),
@@ -87,7 +88,11 @@ export const upsertProduct = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => ProductSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
-    const row = { ...data, images: data.images as any };
+    const row = { 
+      ...data, 
+      images: data.images as any,
+      collections: data.collections as any // 🔹 Save collections array to Supabase
+    };
     const { data: res, error } = data.id
       ? await context.supabase.from("products").update(row).eq("id", data.id).select("*").single()
       : await context.supabase.from("products").insert(row).select("*").single();
@@ -173,7 +178,6 @@ export const adminGetOrder = createServerFn({ method: "GET" })
     ]);
     if (!order) throw new Error("Order not found");
 
-    // Resolve the buyer's contact details for the admin order view.
     let customer: { name: string | null; email: string | null; phone: string | null } = {
       name: null,
       email: null,
@@ -202,7 +206,6 @@ export const adminGetOrder = createServerFn({ method: "GET" })
 
     return { order, items: items ?? [], history: history ?? [], customer };
   });
-
 
 export const adminUpdateOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

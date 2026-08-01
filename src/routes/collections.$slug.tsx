@@ -35,28 +35,34 @@ function CollectionDetail() {
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
-      <section className="gradient-emerald grain text-cream py-20 px-6 lg:px-10">
-        <div className="mx-auto max-w-7xl">
-          <Link to="/collections" className="text-[10px] uppercase tracking-[0.3em] text-gold-brand hover:text-cream">
-            ← All collections
+      <section className="gradient-emerald grain text-cream py-24 px-6 lg:px-10 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-forest-brand/90 via-forest-brand/60 to-transparent pointer-events-none" />
+        <div className="relative z-10 mx-auto max-w-7xl">
+          <Link to="/shop" className="text-[10px] uppercase tracking-[0.3em] text-gold-brand hover:text-cream transition-colors">
+            ← Back to Shop All
           </Link>
-          <h1 className="mt-4 font-display italic text-5xl md:text-6xl">{collection.name}</h1>
-          <p className="mt-3 text-cream/70 text-lg">{collection.tagline}</p>
+          <h1 className="mt-4 font-display italic text-5xl md:text-6xl text-cream">{collection.name}</h1>
+          <p className="mt-3 text-cream/80 text-base max-w-lg">{collection.tagline}</p>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-6 lg:px-10 py-16">
         {isLoading ? (
-          <p className="text-center py-24 text-muted-foreground">Loading pieces…</p>
+          <div className="flex flex-col items-center justify-center py-24 gap-3">
+            <div className="size-8 rounded-full border-2 border-gold-brand border-t-transparent animate-spin" />
+            <p className="text-sm text-muted-foreground">Loading pieces…</p>
+          </div>
         ) : items.length === 0 ? (
-          <div className="text-center py-24">
-            <p className="text-muted-foreground">New pieces in this collection are being finished.</p>
-            <Link to="/shop" className="mt-6 inline-block text-emerald-brand text-[11px] uppercase tracking-[0.2em] font-semibold">
-              Shop all →
-            </Link>
+          <div className="text-center py-24 space-y-4">
+            <p className="font-display italic text-2xl text-forest-brand">New pieces in this collection are being finished.</p>
+            <div>
+              <Link to="/shop" className="mt-4 inline-block px-6 py-3 bg-forest-brand text-gold-brand text-[10px] uppercase tracking-[0.2em] font-semibold rounded-full hover:bg-emerald-brand hover:text-cream transition-colors">
+                Shop all products →
+              </Link>
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14 animate-fade-up">
             {items.map((p) => (
               <ProductCard key={p.slug} product={p} />
             ))}
