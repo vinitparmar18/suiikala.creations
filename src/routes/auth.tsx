@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/auth-context";
 import { consumeAuthRedirect, isAuthenticatedUserAdmin, rememberAuthRedirect, resetAuthSessionReadiness, toSafeAuthRedirect } from "@/lib/auth-session";
 import { toast } from "sonner";
@@ -84,15 +83,23 @@ function AuthPage() {
     }
   };
 
+  // FIXED: Direct Supabase Google OAuth (Bypasses Lovable proxy & works on Vercel)
   const google = async () => {
     setBusy(true);
     const redirectTarget = toSafeAuthRedirect(redirect);
     rememberAuthRedirect(redirectTarget);
-    const res = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/auth?redirect=${encodeURIComponent(redirectTarget)}`,
+    
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth?redirect=${encodeURIComponent(redirectTarget)}`,
+      },
     });
-    if (res.error) toast.error(res.error.message ?? "Google sign-in failed");
-    setBusy(false);
+
+    if (error) {
+      toast.error(error.message ?? "Google sign-in failed");
+      setBusy(false);
+    }
   };
 
   return (
