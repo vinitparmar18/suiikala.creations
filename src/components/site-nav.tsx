@@ -37,12 +37,11 @@ export function SiteNav() {
     e.preventDefault();
     const q = term.trim();
     if (!q) return;
-    searchOpen(false);
+    setSearchOpen(false); // Fix: searchOpen ki jagah setSearchOpen kiya gaya hai
     setOpen(false);
     setTerm("");
     navigate({ to: "/search", search: { q } as never });
   };
-
   return (
     <>
       <header className="sticky top-0 z-50 glass border-b border-foreground/5">

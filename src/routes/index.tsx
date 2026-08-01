@@ -13,6 +13,7 @@ import {
   fetchProductsByCollection,
   type Product,
 } from "@/lib/catalog";
+import { supabase } from "@/lib/supabase";
 
 import hisFavImg from "@/assets/his-favourite.jpg";
 import desiDivaImg from "@/assets/desi-diva.jpg";
@@ -79,6 +80,24 @@ function Home() {
     queryFn: () => fetchProductsByCollection("desi-diva"),
   });
 
+  // Fetch dynamic banners from Supabase (fixed column active and removed order_index to avoid missing column error)
+  const { data: banners = [] } = useQuery({
+    queryKey: ["home-banners"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("banners")
+        .select("*")
+        .eq("active", true);
+      if (error) {
+        console.error("Error fetching banners:", error);
+        return [];
+      }
+      return data;
+    },
+  });
+
+  const heroBanner = banners.find((b) => b.type === "hero") || banners[0];
+
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
@@ -103,19 +122,19 @@ function Home() {
             </p>
           </div>
           <h1 className="font-display text-cream text-[2.6rem] sm:text-6xl lg:text-8xl leading-[1.05] max-w-4xl text-balance">
-            Gifts that Feel
+            {heroBanner ? heroBanner.title : "Gifts that Feel"}
             <br />
-            <span className="italic text-gold-shimmer">Like a Hug</span>
+            <span className="italic text-gold-shimmer">{heroBanner ? heroBanner.subtitle : "Like a Hug"}</span>
           </h1>
           <p className="mt-6 sm:mt-8 max-w-lg text-cream/80 text-sm sm:text-lg leading-relaxed">
-            Handcrafted keepsakes, jewellery and hampers — designed to hold a feeling long after the moment has passed.
+            {heroBanner ? heroBanner.description : "Handcrafted keepsakes, jewellery and hampers — designed to hold a feeling long after the moment has passed."}
           </p>
           <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-3 sm:gap-4">
             <Link
-              to="/shop"
+              to={heroBanner?.button_link || "/shop"}
               className="group inline-flex items-center justify-center gap-3 bg-gold-brand text-forest-brand px-7 sm:px-8 py-4 text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-gold-light transition-colors"
             >
-              Shop the Collection
+              {heroBanner?.button_text || "Shop the Collection"}
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link

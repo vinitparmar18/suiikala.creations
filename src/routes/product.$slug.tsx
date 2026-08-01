@@ -220,7 +220,7 @@ function ProductDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background relative pb-24 md:pb-0">
       <SiteNav />
 
       {/* Large Center Login Required Modal Popup */}
@@ -265,7 +265,7 @@ function ProductDetail() {
       )}
 
       {/* Breadcrumb Navigation */}
-      <div className="mx-auto max-w-7xl px-6 lg:px-10 pt-8 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 pt-6 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         <Link to="/" className="hover:text-emerald-brand">Home</Link>
         <span className="mx-2">/</span>
         <Link to="/shop" className="hover:text-emerald-brand">Shop</Link>
@@ -274,11 +274,11 @@ function ProductDetail() {
       </div>
 
       {/* Main Content Section */}
-      <section className="mx-auto max-w-7xl px-6 lg:px-10 py-10 grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 py-6 md:py-10 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
         
         {/* Left: Product Images */}
         <div className="space-y-4">
-          <div className="relative rounded-2xl border border-border/70 overflow-hidden bg-secondary/30 shadow-sm p-3 md:p-4">
+          <div className="relative rounded-2xl border border-border/70 overflow-hidden bg-secondary/30 shadow-sm p-2 sm:p-4">
             <div
               className="relative aspect-square overflow-hidden rounded-xl ring-1 ring-border bg-muted cursor-zoom-in"
               onMouseMove={(e) => {
@@ -303,7 +303,7 @@ function ProductDetail() {
           </div>
 
           {images.length > 1 && (
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 gap-2 sm:gap-3">
               {images.slice(0, 8).map((src: string, i: number) => (
                 <button
                   key={i}
@@ -322,15 +322,15 @@ function ProductDetail() {
         {/* Right: Product Details & Actions */}
         <div className="flex flex-col justify-center">
           {product.badge && (
-            <span className="inline-block text-[10px] uppercase tracking-[0.2em] font-semibold text-gold-brand mb-3">
+            <span className="inline-block text-[10px] uppercase tracking-[0.2em] font-semibold text-gold-brand mb-2">
               {product.badge}
             </span>
           )}
-          <h1 className="font-display italic text-4xl md:text-5xl text-forest-brand leading-tight">{product.name}</h1>
-          <p className="mt-3 text-muted-foreground text-sm leading-relaxed">{product.tagline}</p>
+          <h1 className="font-display italic text-3xl sm:text-4xl md:text-5xl text-forest-brand leading-tight">{product.name}</h1>
+          <p className="mt-2 sm:mt-3 text-muted-foreground text-xs sm:text-sm leading-relaxed">{product.tagline}</p>
 
           {/* Ratings & Write Review Toggle Link */}
-          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="mt-3 sm:mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="flex items-center gap-2">
               <div className="flex text-gold-brand">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -397,27 +397,27 @@ function ProductDetail() {
           )}
 
           {/* Pricing */}
-          <div className="mt-6 flex items-baseline gap-4">
-            <span className="font-mono text-3xl text-emerald-brand font-semibold">{inr(product.price)}</span>
+          <div className="mt-5 sm:mt-6 flex items-baseline gap-4">
+            <span className="font-mono text-2xl sm:text-3xl text-emerald-brand font-semibold">{inr(product.price)}</span>
             {product.compareAt && (
-              <span className="text-lg line-through text-muted-foreground">{inr(product.compareAt)}</span>
+              <span className="text-base sm:text-lg line-through text-muted-foreground">{inr(product.compareAt)}</span>
             )}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground">Inclusive of all taxes</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">Inclusive of all taxes</p>
 
-          <div className="mt-6 gold-divider" />
+          <div className="mt-4 sm:mt-6 gold-divider" />
 
           {/* Quantity Selector */}
-          <div className="mt-6">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-forest-brand mb-3">Quantity</p>
+          <div className="mt-5 sm:mt-6">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-forest-brand mb-2">Quantity</p>
             <div className="inline-flex items-center border border-border rounded-full">
-              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-3 hover:text-emerald-brand" aria-label="Decrease">
+              <button onClick={() => setQty((q) => Math.max(1, q - 1))} className="p-2.5 sm:p-3 hover:text-emerald-brand" aria-label="Decrease">
                 <Minus className="size-3" />
               </button>
               <span className="w-10 text-center text-sm">{qty}</span>
               <button
                 onClick={() => setQty((q) => Math.min(Math.max(product.stock, 1), q + 1))}
-                className="p-3 hover:text-emerald-brand"
+                className="p-2.5 sm:p-3 hover:text-emerald-brand"
                 aria-label="Increase"
               >
                 <Plus className="size-3" />
@@ -429,14 +429,14 @@ function ProductDetail() {
           </div>
 
           {/* Add to Bag, Buy Now & Wishlist CTA Buttons */}
-          <div className="mt-8 space-y-3">
+          <div className="mt-6 sm:mt-8 space-y-3">
             <div className="flex gap-3">
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
-                className={`flex-1 py-4 text-[11px] uppercase tracking-[0.2em] font-semibold transition-all rounded-full shadow-luxe flex items-center justify-center gap-2 ${
+                className={`flex-1 py-3.5 sm:py-4 text-[11px] uppercase tracking-[0.2em] font-semibold transition-all rounded-full shadow-luxe flex items-center justify-center gap-2 ${
                   isAdded 
-                    ? "bg-[#062c1e] text-amber-100 ring-2 ring-emerald-600 shadow-lg scale-[1.01]" // Professional deep dark rich success state
+                    ? "bg-[#062c1e] text-amber-100 ring-2 ring-emerald-600 shadow-lg scale-[1.01]" 
                     : "bg-forest-brand text-cream hover:bg-emerald-brand"
                 } disabled:opacity-50`}
               >
@@ -451,7 +451,7 @@ function ProductDetail() {
               <button
                 onClick={handleWishlistToggle}
                 aria-label="Wishlist"
-                className={`grid place-items-center size-14 border rounded-full transition-colors shrink-0 shadow-sm ${
+                className={`grid place-items-center size-12 sm:size-14 border rounded-full transition-colors shrink-0 shadow-sm ${
                   wished ? "border-emerald-brand bg-emerald-brand text-cream" : "border-border hover:border-emerald-brand"
                 }`}
               >
@@ -463,14 +463,14 @@ function ProductDetail() {
             <button
               onClick={handleBuyNow}
               disabled={product.stock === 0}
-              className="w-full rounded-full border-2 border-forest-brand bg-transparent py-4 text-center text-xs uppercase tracking-[0.2em] font-semibold text-forest-brand transition-all hover:bg-forest-brand hover:text-cream shadow-sm disabled:opacity-50"
+              className="w-full rounded-full border-2 border-forest-brand bg-transparent py-3.5 sm:py-4 text-center text-xs uppercase tracking-[0.2em] font-semibold text-forest-brand transition-all hover:bg-forest-brand hover:text-cream shadow-sm disabled:opacity-50"
             >
               Buy It Now
             </button>
           </div>
 
           {/* Trust Badges */}
-          <div className="mt-8 grid grid-cols-3 gap-3 text-center">
+          <div className="mt-6 sm:mt-8 grid grid-cols-3 gap-2 sm:gap-3 text-center">
             {[
               [Truck, "Free ship ₹999+"],
               [Gift, "Gift ready"],
@@ -478,16 +478,16 @@ function ProductDetail() {
             ].map(([Icon, label], i) => {
               const I = Icon as typeof Truck;
               return (
-                <div key={i} className="border border-border p-4 bg-card/35 rounded-xl">
+                <div key={i} className="border border-border p-3 sm:p-4 bg-card/35 rounded-xl">
                   <I className="size-4 text-gold-brand mx-auto" />
-                  <p className="mt-2 text-[10px] uppercase tracking-[0.15em] text-forest-brand">{label as string}</p>
+                  <p className="mt-2 text-[9px] sm:text-[10px] uppercase tracking-[0.15em] text-forest-brand">{label as string}</p>
                 </div>
               );
             })}
           </div>
 
           {/* Specifications & Supabase Reviews */}
-          <div className="mt-8 space-y-4">
+          <div className="mt-6 sm:mt-8 space-y-4">
             {product.material && <Section title="Materials">{product.material}</Section>}
             
             {dbReviews.length > 0 && (
@@ -517,11 +517,35 @@ function ProductDetail() {
         </div>
       </section>
 
+      {/* Mobile Sticky Bottom Action Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border p-3 flex items-center gap-3 shadow-lg">
+        <div className="flex flex-col">
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Total Price</span>
+          <span className="font-mono text-base font-semibold text-emerald-brand">{inr(product.price * qty)}</span>
+        </div>
+        <div className="flex flex-1 gap-2">
+          <button
+            onClick={handleAddToCart}
+            disabled={product.stock === 0}
+            className="flex-1 bg-forest-brand text-cream py-2.5 rounded-full text-[10px] uppercase tracking-wider font-semibold hover:bg-emerald-brand disabled:opacity-50 text-center"
+          >
+            {product.stock === 0 ? "Sold Out" : isAdded ? "Added ✓" : "Add to Bag"}
+          </button>
+          <button
+            onClick={handleBuyNow}
+            disabled={product.stock === 0}
+            className="flex-1 border border-forest-brand text-forest-brand py-2.5 rounded-full text-[10px] uppercase tracking-wider font-semibold hover:bg-forest-brand hover:text-cream disabled:opacity-50 text-center"
+          >
+            Buy Now
+          </button>
+        </div>
+      </div>
+
       {/* Related Products */}
       {related.length > 0 && (
-        <section className="mx-auto max-w-7xl px-6 lg:px-10 py-16 border-t border-border">
-          <h2 className="font-display italic text-3xl text-forest-brand mb-10">You may also love</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-10 py-12 md:py-16 border-t border-border">
+          <h2 className="font-display italic text-2xl sm:text-3xl text-forest-brand mb-8">You may also love</h2>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
             {related.map((p) => (
               <ProductCard key={p.slug} product={p} />
             ))}
