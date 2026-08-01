@@ -87,66 +87,67 @@ function AllProductsPage() {
 
       {/* Professional E-commerce Filter & Sort Bar */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border shadow-xs">
-        <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-10 py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          
-          {/* Left: Filters (Collection & Budget) */}
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-foreground/50 flex items-center gap-1 font-semibold">
-              <SlidersHorizontal className="size-3.5 text-emerald-brand" /> Filters:
-            </span>
+        <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-10 py-3">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between">
+            
+            {/* Left Group: Categories & Budgets */}
+            <div className="col-span-2 sm:col-auto flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+              <span className="text-[10px] uppercase tracking-[0.15em] text-foreground/50 hidden md:flex items-center gap-1 font-semibold shrink-0">
+                <SlidersHorizontal className="size-3.5 text-emerald-brand" /> Filter:
+              </span>
 
-            {/* Collection Dropdown Filter */}
-            <select
-              value={search.collection ?? "all"}
-              onChange={(e) => navigate({ search: (prev: SearchParams) => ({ ...prev, collection: e.target.value === "all" ? undefined : e.target.value }) })}
-              className="bg-secondary/50 border border-border rounded-full px-4 py-1.5 text-xs text-forest-brand font-medium focus:outline-none focus:border-emerald-brand cursor-pointer"
-            >
-              <option value="all">All Categories</option>
-              {collections.map((c) => (
-                <option key={c.slug} value={c.slug}>{c.name}</option>
-              ))}
-            </select>
-
-            {/* Budget Dropdown Filter */}
-            <select
-              value={search.budget ?? "all"}
-              onChange={(e) => navigate({ search: (prev: SearchParams) => ({ ...prev, budget: e.target.value === "all" ? undefined : e.target.value }) })}
-              className="bg-secondary/50 border border-border rounded-full px-4 py-1.5 text-xs text-forest-brand font-medium focus:outline-none focus:border-emerald-brand cursor-pointer"
-            >
-              <option value="all">All Budgets</option>
-              {Object.keys(budgetRanges).map((bKey) => (
-                <option key={bKey} value={bKey}>{budgetLabels[bKey]}</option>
-              ))}
-            </select>
-
-            {(search.budget || search.collection) && (
-              <button
-                onClick={clearAllFilters}
-                type="button"
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-destructive hover:bg-destructive/10 rounded-full font-semibold transition-colors"
+              {/* Collection Dropdown */}
+              <select
+                value={search.collection ?? "all"}
+                onChange={(e) => navigate({ search: (prev: SearchParams) => ({ ...prev, collection: e.target.value === "all" ? undefined : e.target.value }) })}
+                className="flex-1 sm:flex-none bg-secondary/70 border border-border rounded-full px-3 py-2 text-[11px] text-forest-brand font-medium focus:outline-none focus:border-emerald-brand cursor-pointer truncate"
               >
-                Reset <X className="size-3" />
-              </button>
-            )}
-          </div>
+                <option value="all">All Categories</option>
+                {collections.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                ))}
+              </select>
 
-          {/* Right: Sorting */}
-          <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-            <label className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-foreground/60 font-semibold">
-              Sort by
+              {/* Budget Dropdown */}
+              <select
+                value={search.budget ?? "all"}
+                onChange={(e) => navigate({ search: (prev: SearchParams) => ({ ...prev, budget: e.target.value === "all" ? undefined : e.target.value }) })}
+                className="flex-1 sm:flex-none bg-secondary/70 border border-border rounded-full px-3 py-2 text-[11px] text-forest-brand font-medium focus:outline-none focus:border-emerald-brand cursor-pointer truncate"
+              >
+                <option value="all">All Budgets</option>
+                {Object.keys(budgetRanges).map((bKey) => (
+                  <option key={bKey} value={bKey}>{budgetLabels[bKey]}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Right Group: Sort & Reset */}
+            <div className="col-span-2 sm:col-auto flex items-center justify-between sm:justify-end gap-2 pt-1 sm:pt-0 border-t sm:border-t-0 border-border/50">
+              {/* Reset Filters Button (if active) */}
+              {(search.budget || search.collection) ? (
+                <button
+                  onClick={clearAllFilters}
+                  type="button"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 text-[10px] uppercase tracking-[0.15em] text-destructive hover:bg-destructive/10 rounded-full font-semibold transition-colors shrink-0"
+                >
+                  Reset <X className="size-3" />
+                </button>
+              ) : null}
+
+              {/* Sorting Dropdown */}
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as typeof sort)}
-                className="bg-secondary/50 border border-border rounded-full px-4 py-1.5 text-xs text-forest-brand font-medium focus:outline-none focus:border-emerald-brand cursor-pointer"
+                className="w-full sm:w-auto bg-secondary/70 border border-border rounded-full px-3 py-2 text-[11px] text-forest-brand font-medium focus:outline-none focus:border-emerald-brand cursor-pointer"
               >
-                <option value="featured">Featured</option>
-                <option value="new">Newest First</option>
+                <option value="featured">Sort: Featured</option>
+                <option value="new">Sort: Newest</option>
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
               </select>
-            </label>
-          </div>
+            </div>
 
+          </div>
         </div>
       </div>
 
