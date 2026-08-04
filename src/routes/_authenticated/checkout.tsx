@@ -56,6 +56,9 @@ function Checkout() {
   const [coupon, setCoupon] = useState("");
   const [notes, setNotes] = useState("");
 
+  // Animation & Success State
+  const [successData, setSuccessData] = useState<{ order_id: string; order_number: string; total: number } | null>(null);
+
   const items = cart
     .map((i) => ({ item: i, product: bySlug.get(i.slug) }))
     .filter((x): x is { item: (typeof cart)[number]; product: NonNullable<ReturnType<typeof bySlug.get>> } => !!x.product);
@@ -90,8 +93,13 @@ function Checkout() {
     },
     onSuccess: (r) => {
       items.forEach(({ product }) => removeFromCart(product.slug));
-      toast.success(`Order ${r.order_number} placed!`);
-      nav({ to: "/account/orders/$id", params: { id: r.order_id } });
+      setSuccessData(r); // Trigger success animation view
+      toast.success(`Order ${r.order_number} placed successfully!`);
+      
+      // Redirect after 3 seconds so user enjoys the gorgeous animation
+      setTimeout(() => {
+        nav({ to: "/account/orders/$id", params: { id: r.order_id } });
+      }, 3000);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Failed to place order"),
   });
@@ -102,7 +110,7 @@ function Checkout() {
     mut.mutate();
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !successData) {
     return (
       <div className="min-h-screen bg-background flex flex-col">
         <SiteNav />
@@ -121,8 +129,45 @@ function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col relative">
       <SiteNav />
+
+      {/* 🎉 AMAZING SUCCESS ANIMATION MODAL / SCREEN */}
+      {successData && (
+        <div className="fixed inset-0 z-50 bg-forest-brand/80 backdrop-blur-md flex items-center justify-center p-6 animate-fadeIn">
+          <div className="bg-card border border-border max-w-md w-full p-8 text-center shadow-2xl relative transform animate-scaleUp rounded-xl">
+            {/* Animated Checkmark Circle */}
+            <div className="mx-auto w-20 h-20 bg-emerald-brand/10 border-2 border-emerald-brand rounded-full flex items-center justify-center mb-6 animate-bounce">
+              <svg className="w-10 h-10 text-emerald-brand animate-pulse" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+
+            <p className="text-[10px] uppercase tracking-[0.4em] text-emerald-brand font-semibold">Thank you for your order!</p>
+            <h2 className="font-display italic text-3xl text-forest-brand mt-2">Order Confirmed</h2>
+            <p className="text-sm text-muted-foreground mt-2">
+              Your order <span className="font-mono font-bold text-forest-brand">#{successData.order_number}</span> has been successfully placed with love.
+            </p>
+
+            <div className="mt-6 bg-secondary/50 p-4 rounded-lg border border-border text-sm flex justify-between items-center">
+              <span className="text-muted-foreground">Total Amount Paid</span>
+              <span className="font-mono text-lg font-semibold text-emerald-brand">{inr(successData.total)}</span>
+            </div>
+
+            <div className="mt-8">
+              <Link
+                to="/account/orders/$id"
+                params={{ id: successData.order_id }}
+                className="inline-block w-full bg-forest-brand text-cream py-3.5 text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-emerald-brand transition-colors rounded"
+              >
+                View Order Details Now →
+              </Link>
+            </div>
+            <p className="text-[11px] text-muted-foreground mt-4 animate-pulse">Redirecting to your order summary automatically…</p>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={submit} className="mx-auto max-w-7xl w-full px-6 lg:px-10 py-12 flex-1">
         <p className="text-[10px] uppercase tracking-[0.4em] text-emerald-brand mb-3">Secure checkout</p>
         <h1 className="font-display italic text-4xl md:text-5xl text-forest-brand">Checkout</h1>
@@ -134,7 +179,7 @@ function Checkout() {
             </Section>
 
             <Section title="Billing Address">
-              <label className="flex items-center gap-2 text-sm mb-4">
+              <label className="flex items-center gap-2 text-sm mb-4 cursor-pointer">
                 <input type="checkbox" checked={billingSame} onChange={(e) => setBillingSame(e.target.checked)} />
                 Same as shipping address
               </label>
@@ -188,19 +233,19 @@ function Checkout() {
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 placeholder="Gift wrapping preferences, special instructions…"
-                className="w-full border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:border-emerald-brand"
+                className="w-full border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:border-emerald-brand rounded"
               />
             </Section>
           </div>
 
-          <aside className="bg-secondary/50 p-8 h-fit lg:sticky lg:top-24 border border-border">
+          <aside className="bg-secondary/50 p-8 h-fit lg:sticky lg:top-24 border border-border rounded-xl">
             <h2 className="font-display italic text-2xl text-forest-brand">Order Summary</h2>
             <div className="mt-6 space-y-3 max-h-64 overflow-auto">
               {items.map(({ item, product }) => (
-                <div key={product.slug} className="flex gap-3 text-sm">
-                  <img src={product.image || PLACEHOLDER_IMG} alt={product.name} className="size-14 object-cover ring-1 ring-border" />
+                <div key={product.slug} className="flex gap-3 text-sm items-center">
+                  <img src={product.image || PLACEHOLDER_IMG} alt={product.name} className="size-14 object-cover ring-1 ring-border rounded" />
                   <div className="flex-1 min-w-0">
-                    <p className="truncate text-forest-brand">{product.name}</p>
+                    <p className="truncate text-forest-brand font-medium">{product.name}</p>
                     <p className="text-xs text-muted-foreground">Qty {item.qty}</p>
                   </div>
                   <p className="font-mono text-emerald-brand">{inr(product.price * item.qty)}</p>
@@ -212,10 +257,10 @@ function Checkout() {
               <input
                 value={coupon}
                 onChange={(e) => setCoupon(e.target.value)}
-                placeholder="Coupon"
-                className="flex-1 border border-border px-3 py-2 text-sm bg-card"
+                placeholder="Coupon code"
+                className="flex-1 border border-border px-3 py-2 text-sm bg-card rounded"
               />
-              <span className="px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground border border-border">
+              <span className="px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground border border-border flex items-center rounded">
                 {discount > 0 ? "Applied" : "SUII10"}
               </span>
             </div>
@@ -233,9 +278,19 @@ function Checkout() {
 
             <button
               disabled={mut.isPending}
-              className="mt-6 w-full bg-forest-brand text-cream py-4 text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-emerald-brand transition-colors disabled:opacity-60"
+              className="mt-6 w-full bg-forest-brand text-cream py-4 text-[11px] uppercase tracking-[0.2em] font-semibold hover:bg-emerald-brand transition-colors disabled:opacity-60 cursor-pointer rounded flex items-center justify-center gap-2"
             >
-              {mut.isPending ? "Placing order…" : `Place Order · ${inr(total)}`}
+              {mut.isPending ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Placing order…
+                </>
+              ) : (
+                `Place Order · ${inr(total)}`
+              )}
             </button>
           </aside>
         </div>
@@ -266,7 +321,7 @@ function Option({ active, onClick, title, desc, price }: { active: boolean; onCl
     <button
       type="button"
       onClick={onClick}
-      className={`text-left p-4 border transition-colors ${active ? "border-emerald-brand bg-secondary/50" : "border-border hover:border-forest-brand"}`}
+      className={`text-left p-4 border transition-colors cursor-pointer rounded ${active ? "border-emerald-brand bg-secondary/50" : "border-border hover:border-forest-brand"}`}
     >
       <div className="flex justify-between items-baseline">
         <span className="text-sm font-medium text-forest-brand">{title}</span>
@@ -281,7 +336,7 @@ function PayOption({ active, onClick, title, desc }: { active: boolean; onClick:
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left p-4 border transition-colors ${active ? "border-emerald-brand bg-secondary/50" : "border-border hover:border-forest-brand"}`}
+      className={`w-full text-left p-4 border transition-colors cursor-pointer rounded ${active ? "border-emerald-brand bg-secondary/50" : "border-border hover:border-forest-brand"}`}
     >
       <p className="text-sm font-medium text-forest-brand">{title}</p>
       <p className="text-xs text-muted-foreground mt-1">{desc}</p>
@@ -312,7 +367,7 @@ function Input({ label, value, onChange, required, full }: { label: string; valu
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required={required}
-        className="mt-1 w-full border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:border-emerald-brand"
+        className="mt-1 w-full border border-border bg-card px-4 py-3 text-sm focus:outline-none focus:border-emerald-brand rounded"
       />
     </label>
   );
