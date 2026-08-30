@@ -3,6 +3,9 @@ import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { collections } from "@/lib/collections";
 import { Sparkles, Layers } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { PLACEHOLDER_IMG } from "@/lib/catalog";
 
 export const Route = createFileRoute("/shop")({
   head: () => ({
@@ -19,6 +22,35 @@ export const Route = createFileRoute("/shop")({
 });
 
 function ShopHub() {
+  // 🚀 MAGIC HAPPENS HERE: Database se Admin wali nayi categories fetch kar rahe hain
+  const { data: dbCategories = [] } = useQuery({
+    queryKey: ["dynamic-categories"],
+    queryFn: async () => {
+      // Hum 'categories' table se data la rahe hain (Jo admin panel create karta hai)
+      const { data, error } = await supabase.from("categories").select("*");
+      
+      if (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+      }
+      
+      // Data ko format kar rahe hain taaki wo cards mein sahi se fit baithe
+      return (data || []).map((c: any) => ({
+        slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
+        name: c.name,
+        tagline: c.description || c.tagline || "Discover our new collection",
+        image: c.image || c.image_url || PLACEHOLDER_IMG
+      }));
+    }
+  });
+
+  // 🚀 HYBRID MERGE: Purani list aur Nayi admin list dono ko mila diya!
+  // Isse hardcoded categories aur nayi DB categories dono dikhengi, aur duplicate bhi nahi hongi.
+  const allCollections = [
+    ...collections,
+    ...dbCategories.filter(dbCat => !collections.some(staticCat => staticCat.slug === dbCat.slug))
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
@@ -39,12 +71,11 @@ function ShopHub() {
         
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
           
-          {/* 1. Custom Brand Signature "All Masterpieces" Card (No Product Image, Pure Suiikala Aesthetic) */}
+          {/* 1. Custom Brand Signature "All Masterpieces" Card */}
           <Link
             to="/all-products"
             className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-gold-brand bg-forest-brand shadow-lg block text-left transition-all duration-500 hover:shadow-2xl hover:-translate-y-1"
           >
-            {/* Rich gradient & subtle texture overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-forest-brand via-[#163024] to-emerald-950" />
             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#d4af37_1px,transparent_1px)] [background-size:12px_12px] pointer-events-none" />
             
@@ -63,12 +94,11 @@ function ShopHub() {
                 </span>
               </div>
             </div>
-
             <span className="pointer-events-none absolute inset-1.5 border border-gold-brand/40 group-hover:border-gold-brand transition-colors duration-500 rounded-lg z-20" />
           </Link>
 
-          {/* 2. Individual Category Image Cards */}
-          {collections.map((c, i) => (
+          {/* 2. Individual Category Image Cards (NOW FULLY DYNAMIC!) */}
+          {allCollections.map((c, i) => (
             <Link
               key={c.slug}
               to="/collections/$slug" 

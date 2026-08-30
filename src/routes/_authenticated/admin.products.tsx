@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { deleteProduct, listProducts, upsertProduct } from "@/lib/admin.functions";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { ImageUploader } from "@/components/admin/image-uploader";
+import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({ component: ProductsPage });
 
@@ -17,7 +18,7 @@ const empty = {
   seo_title: "", seo_description: "",
 };
 
-// 📦 Official Collections for multi-selection
+// 📦 Original Hardcoded Collections (Jo pehle se thi wo sab yahan hain)
 const OFFICIAL_COLLECTIONS = [
   { slug: "bracelets", name: "Bracelets" },
   { slug: "anklets", name: "Anklets" },
@@ -117,13 +118,34 @@ function ProductModal({ product, onClose, onSave, saving }: { product: typeof em
   const [f, setF] = useState(product);
   const set = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }));
   
+  // 🚀 Fetch dynamic categories from Supabase and merge with OFFICIAL_COLLECTIONS
+  const { data: dbCategories = [] } = useQuery({
+    queryKey: ["admin-modal-categories-combined"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("categories").select("*");
+      if (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+      }
+      return (data || []).map((c: any) => ({
+        slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
+        name: c.name
+      }));
+    }
+  });
+
+  // Combine original static collections with newly fetched database categories (avoiding duplicate slugs)
+  const allCollections = [
+    ...OFFICIAL_COLLECTIONS,
+    ...dbCategories.filter(dbCat => !OFFICIAL_COLLECTIONS.some(staticCat => staticCat.slug === dbCat.slug))
+  ];
+
   const toggleCollection = (slug: string) => {
     const current = f.collections || [];
     const next = current.includes(slug)
       ? current.filter((s) => s !== slug)
       : [...current, slug];
     set("collections", next);
-    // Primary collection ko bhi sync rakhne ke liye pehla item set kar sakte hain
     if (next.length > 0) {
       set("collection", next[0]);
       set("category", next[0]);
@@ -160,10 +182,10 @@ function ProductModal({ product, onClose, onSave, saving }: { product: typeof em
           <Field label="Price (₹)"><input type="number" value={f.price} onChange={(e) => set("price", +e.target.value)} className={input} /></Field>
           <Field label="Compare-at (₹)"><input type="number" value={f.compare_at ?? ""} onChange={(e) => set("compare_at", e.target.value ? +e.target.value : null)} className={input} /></Field>
           
-          {/* 🔹 Multi-Select Checkboxes for Collections */}
+          {/* 🔹 Combined Static + Dynamic Checkboxes */}
           <Field label="Show in Collections (Select multiple)" full>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-black/20 p-3 rounded-lg border border-white/10 max-h-48 overflow-y-auto">
-              {OFFICIAL_COLLECTIONS.map((col) => {
+              {allCollections.map((col: any) => {
                 const isSelected = (f.collections || []).includes(col.slug);
                 return (
                   <label 

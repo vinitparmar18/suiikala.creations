@@ -5,15 +5,16 @@ import { useRef } from "react";
 import { SiteNav } from "@/components/site-nav";
 import { SiteFooter } from "@/components/site-footer";
 import { ProductCard } from "@/components/product-card";
-import { CollectionGrid } from "@/components/collection-cards";
 import {
   fetchFeatured,
   fetchNewArrivals,
   fetchNewLaunches,
   fetchProductsByCollection,
   type Product,
+  PLACEHOLDER_IMG,
 } from "@/lib/catalog";
 import { supabase } from "@/lib/supabase";
+import { collections as staticCollections } from "@/lib/collections";
 
 import hisFavImg from "@/assets/his-favourite.jpg";
 import desiDivaImg from "@/assets/desi-diva.jpg";
@@ -80,7 +81,7 @@ function Home() {
     queryFn: () => fetchProductsByCollection("desi-diva"),
   });
 
-  // Fetch dynamic banners from Supabase (fixed column active and removed order_index to avoid missing column error)
+  // Fetch dynamic banners from Supabase
   const { data: banners = [] } = useQuery({
     queryKey: ["home-banners"],
     queryFn: async () => {
@@ -197,7 +198,7 @@ function Home() {
         alt={newLaunches.length === 0}
       />
 
-      {/* Section 4 — Our Collections */}
+      {/* Section 4 — Our Collections (NOW DYNAMIC WITH SUPABASE) */}
       <section className="py-16 sm:py-24 px-5 sm:px-6 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <div className="flex items-end justify-between mb-10 sm:mb-12 gap-4 sm:gap-6 flex-wrap">
@@ -213,7 +214,7 @@ function Home() {
               View all <ArrowUpRight className="size-3" />
             </Link>
           </div>
-          <CollectionGrid />
+          <DynamicCollectionGrid />
         </div>
       </section>
 
@@ -287,10 +288,9 @@ function Home() {
         </div>
       </section>
 
-      {/* Container with spacing and border between His Favourite & Desi Diva */}
       <div className="my-12 sm:my-16 border-t border-gold-brand/30" />
 
-      {/* Section 7 — His Favourite with Background Image */}
+      {/* Section 7 — His Favourite */}
       <BackgroundImageSliderSection
         eyebrow="Curated for him"
         title="His Favourite ❤️"
@@ -301,7 +301,7 @@ function Home() {
 
       <div className="my-12 sm:my-16 border-t border-gold-brand/30" />
 
-      {/* Section 8 — Desi Diva Collection with Background Image */}
+      {/* Section 8 — Desi Diva Collection */}
       <BackgroundImageSliderSection
         eyebrow="The Traditional Edit"
         title="Desi Diva Collection"
@@ -311,6 +311,59 @@ function Home() {
       />
 
       <SiteFooter />
+    </div>
+  );
+}
+
+// 🚀 Dynamic Collection Grid component for Home Page
+function DynamicCollectionGrid() {
+  const { data: dbCategories = [] } = useQuery({
+    queryKey: ["home-dynamic-categories"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("categories").select("*");
+      if (error) {
+        console.error("Error fetching categories:", error);
+        return [];
+      }
+      return (data || []).map((c: any) => ({
+        slug: c.slug || c.name.toLowerCase().replace(/\s+/g, '-'),
+        name: c.name,
+        tagline: c.description || c.tagline || "",
+        image: c.image || c.image_url || PLACEHOLDER_IMG
+      }));
+    }
+  });
+
+  const allCollections = [
+    ...staticCollections,
+    ...dbCategories.filter(dbCat => !staticCollections.some(staticCat => staticCat.slug === dbCat.slug))
+  ];
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
+      {allCollections.map((c, i) => (
+        <Link
+          key={c.slug}
+          to="/collections/$slug"
+          params={{ slug: c.slug }}
+          className="group relative aspect-[4/5] overflow-hidden rounded-xl border border-border/80 bg-secondary/40 hover:border-emerald-brand/70 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 shadow-sm block text-left"
+          style={{ animationDelay: `${Math.min(i, 10) * 50}ms` }}
+        >
+          <img
+            src={c.image}
+            alt={c.name}
+            loading="lazy"
+            width={600}
+            height={750}
+            className="h-full w-full object-cover object-center transition-transform duration-[1400ms] ease-out group-hover:scale-110"
+          />
+          <span className="absolute inset-0 bg-gradient-to-t from-forest-brand/90 via-forest-brand/30 to-transparent pointer-events-none" />
+          <span className="absolute inset-x-0 bottom-0 p-4 font-display text-base sm:text-lg text-cream leading-tight z-10">
+            {c.name}
+          </span>
+          <span className="pointer-events-none absolute inset-1.5 border border-gold-brand/0 group-hover:border-gold-brand/40 transition-colors duration-500 rounded-lg z-20" />
+        </Link>
+      ))}
     </div>
   );
 }
@@ -374,7 +427,6 @@ function SliderSection({
           <p className={`py-8 text-sm ${alt ? "text-cream/60" : "text-muted-foreground"}`}>New pieces coming soon.</p>
         ) : (
           <div className="relative group">
-            {/* Left Arrow Button */}
             <button
               onClick={() => scroll("left")}
               aria-label="Scroll Left"
@@ -383,8 +435,6 @@ function SliderSection({
             >
               <ChevronLeft className="size-6" />
             </button>
-
-            {/* Right Arrow Button */}
             <button
               onClick={() => scroll("right")}
               aria-label="Scroll Right"
@@ -394,7 +444,6 @@ function SliderSection({
               <ChevronRight className="size-6" />
             </button>
 
-            {/* Slider Track assigned with scrollRef */}
             <div className="relative -mx-5 sm:-mx-6 lg:-mx-10 overflow-hidden">
               <div
                 ref={scrollRef}
@@ -445,7 +494,6 @@ function BackgroundImageSliderSection({
 
   return (
     <section className="py-16 sm:py-24 px-5 sm:px-6 lg:px-10 relative overflow-hidden bg-forest-brand text-cream border-y border-gold-brand/20">
-      {/* Background Image with Gradient Overlay */}
       <div className="absolute inset-0 grain opacity-40 pointer-events-none" />
       <img
         src={bgImg}
@@ -484,7 +532,6 @@ function BackgroundImageSliderSection({
           <p className="py-8 text-sm text-cream/60">New pieces coming soon.</p>
         ) : (
           <div className="relative group">
-            {/* Left Arrow Button */}
             <button
               onClick={() => scroll("left")}
               aria-label="Scroll Left"
@@ -493,8 +540,6 @@ function BackgroundImageSliderSection({
             >
               <ChevronLeft className="size-6" />
             </button>
-
-            {/* Right Arrow Button */}
             <button
               onClick={() => scroll("right")}
               aria-label="Scroll Right"
@@ -504,7 +549,6 @@ function BackgroundImageSliderSection({
               <ChevronRight className="size-6" />
             </button>
 
-            {/* Slider Track assigned with scrollRef */}
             <div className="relative -mx-5 sm:-mx-6 lg:-mx-10 overflow-hidden">
               <div
                 ref={scrollRef}
