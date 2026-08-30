@@ -24,7 +24,7 @@ export function SiteFooter() {
         <div className="flex flex-col items-center pb-12 sm:pb-16 border-b border-cream/10">
           <Link to="/" className="flex flex-col items-center gap-3 group">
             <img 
-              src="/log.jpeg" 
+              src="/2.svg" 
               alt="Suiikala Footer Logo"
               className="h-12 w-auto object-contain rounded-md transition-transform group-hover:scale-105" 
             />

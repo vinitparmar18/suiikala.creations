@@ -37,7 +37,7 @@ export function SiteNav() {
     e.preventDefault();
     const q = term.trim();
     if (!q) return;
-    setSearchOpen(false); // Fix: searchOpen ki jagah setSearchOpen kiya gaya hai
+    setSearchOpen(false);
     setOpen(false);
     setTerm("");
     navigate({ to: "/search", search: { q } as never });
@@ -47,24 +47,24 @@ export function SiteNav() {
       <header className="sticky top-0 z-50 glass border-b border-foreground/5">
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 sm:gap-4 px-4 sm:px-6 lg:px-10">
           <button
-            className="lg:hidden -ml-1 p-2 text-foreground/70 shrink-0" 
+            className="lg:hidden -ml-1 p-2 text-foreground/70 hover:text-[#D4AF37] hover:scale-110 transition-all shrink-0" 
             onClick={() => setOpen(true)}
             aria-label="Open menu"
           >
             <Menu className="size-5" />
           </button>
-
         
           <Link
             to="/"
             className="flex items-center gap-2.5 group shrink-0"
           >
             <img 
-              src="/log.jpeg" 
+              src="/2.svg" 
               alt="Suiikala Logo"
-              className="h-8 w-auto object-contain rounded-md transition-transform group-hover:scale-105" 
+              className="h-10 w-auto object-contain transition-transform group-hover:scale-110" 
             />
-            <span className="font-display italic text-xl sm:text-2xl font-bold tracking-tight text-emerald-brand">
+            {/* Suiikala text with yellow hover */}
+            <span className="font-display italic text-xl sm:text-2xl font-bold tracking-tight text-emerald-brand hover:text-[#D4AF37] transition-colors">
               Suiikala
             </span>
           </Link>
@@ -74,8 +74,8 @@ export function SiteNav() {
               <Link
                 key={n.to}
                 to={n.to}
-                className="text-[11px] uppercase tracking-[0.2em] font-medium text-foreground/70 hover:text-emerald-brand transition-colors"
-                activeProps={{ className: "text-emerald-brand" }}
+                className="text-[11px] uppercase tracking-[0.2em] font-medium text-foreground/70 hover:text-[#D4AF37] hover:scale-110 transition-all duration-200 inline-block"
+                activeProps={{ className: "!text-[#D4AF37]" }}
               >
                 {n.label}
               </Link>
@@ -91,7 +91,7 @@ export function SiteNav() {
               value={term}
               onChange={(e) => setTerm(e.target.value)}
               placeholder="Search"
-              className="w-full bg-transparent border-b border-border py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-emerald-brand transition-colors"
+              className="w-full bg-transparent border-b border-border py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#D4AF37] transition-colors"
             />
           </form>
 
@@ -99,7 +99,7 @@ export function SiteNav() {
             <button
               aria-label="Search"
               onClick={() => setSearchOpen((v) => !v)}
-              className="md:hidden p-2 text-foreground/70 hover:text-emerald-brand transition-colors"
+              className="md:hidden p-2 text-foreground/70 hover:text-[#D4AF37] hover:scale-110 transition-all"
             >
               <Search className="size-[18px]" />
             </button>
@@ -108,7 +108,7 @@ export function SiteNav() {
               <div className="relative">
                 <button
                   onClick={() => setMenu((v) => !v)}
-                  className="hidden sm:flex items-center gap-2 p-2 text-foreground/70 hover:text-emerald-brand transition-colors"
+                  className="hidden sm:flex items-center gap-2 p-2 text-foreground/70 hover:text-[#D4AF37] hover:scale-110 transition-all"
                   aria-label="Account"
                 >
                   <User className="size-[18px]" />
@@ -116,14 +116,14 @@ export function SiteNav() {
                 {menu && (
                   <div className="absolute right-0 top-full mt-2 w-52 bg-card border border-border shadow-lg py-2 z-50">
                     <p className="px-4 py-2 text-xs text-muted-foreground border-b border-border truncate">{user.email}</p>
-                    <Link to="/account" onClick={() => setMenu(false)} className="block px-4 py-2 text-sm hover:bg-secondary text-forest-brand">
+                    <Link to="/account" onClick={() => setMenu(false)} className="block px-4 py-2 text-sm hover:bg-secondary text-forest-brand hover:text-[#D4AF37] transition-colors">
                       My Account
                     </Link>
-                    <Link to="/account/orders" onClick={() => setMenu(false)} className="block px-4 py-2 text-sm hover:bg-secondary text-forest-brand">
+                    <Link to="/account/orders" onClick={() => setMenu(false)} className="block px-4 py-2 text-sm hover:bg-secondary text-forest-brand hover:text-[#D4AF37] transition-colors">
                       My Orders
                     </Link>
                     {isAdmin && (
-                      <Link to="/admin" onClick={() => setMenu(false)} className="px-4 py-2 text-sm hover:bg-secondary text-emerald-brand font-medium flex items-center gap-2 border-t border-border">
+                      <Link to="/admin" onClick={() => setMenu(false)} className="px-4 py-2 text-sm hover:bg-secondary text-emerald-brand font-medium flex items-center gap-2 border-t border-border hover:text-[#D4AF37] transition-colors">
                         <ShieldCheck className="size-3.5" /> Admin Dashboard
                       </Link>
                     )}
@@ -132,7 +132,7 @@ export function SiteNav() {
                         setMenu(false);
                         await signOut();
                       }}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-secondary text-muted-foreground flex items-center gap-2"
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-secondary text-muted-foreground flex items-center gap-2 hover:text-[#D4AF37] transition-colors"
                     >
                       <LogOut className="size-3" /> Sign out
                     </button>
@@ -143,17 +143,17 @@ export function SiteNav() {
               <Link
                 to="/auth"
                 aria-label="Sign in"
-                className="hidden sm:block p-2 text-foreground/70 hover:text-emerald-brand transition-colors"
+                className="hidden sm:block p-2 text-foreground/70 hover:text-[#D4AF37] hover:scale-110 transition-all"
               >
                 <User className="size-[18px]" />
               </Link>
             )}
 
-            <Link to="/account/wishlist" aria-label="Wishlist" className="relative p-2 text-foreground/70 hover:text-emerald-brand transition-colors">
+            <Link to="/account/wishlist" aria-label="Wishlist" className="relative p-2 text-foreground/70 hover:text-[#D4AF37] hover:scale-110 transition-all">
               <Heart className="size-[18px]" />
               {wishlistCount > 0 && <Badge n={wishlistCount} />}
             </Link>
-            <Link to="/cart" aria-label="Cart" className="relative p-2 text-foreground/70 hover:text-emerald-brand transition-colors">
+            <Link to="/cart" aria-label="Cart" className="relative p-2 text-foreground/70 hover:text-[#D4AF37] hover:scale-110 transition-all">
               <ShoppingBag className="size-[18px]" />
               {cartCount > 0 && <Badge n={cartCount} />}
             </Link>
@@ -169,7 +169,7 @@ export function SiteNav() {
               onChange={(e) => setTerm(e.target.value)}
               placeholder="Search for gifts, jewellery…"
               aria-label="Search products"
-              className="w-full bg-secondary px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-emerald-brand"
+              className="w-full bg-secondary px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
             />
           </form>
         )}
@@ -189,15 +189,14 @@ export function SiteNav() {
             {/* Header section */}
             <div className="p-6 border-b border-white/10 flex items-start justify-between gap-4">
               
-              {/* 🌟 MOBILE: LOGO + BRAND NAME COMBINATION 🌟 */}
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3">
                   <img 
-                    src="/log.jpeg" 
+                    src="/2.svg" 
                     alt="Suiikala Logo" 
-                    className="h-10 w-auto object-contain rounded-md" 
+                    className="h-12 w-auto object-contain brightness-0 invert" 
                   />
-                  <h1 className="font-display italic text-3xl sm:text-4xl text-[#D4AF37] whitespace-nowrap leading-none">
+                  <h1 className="font-display italic text-3xl sm:text-4xl text-[#D4AF37] hover:scale-105 transition-transform whitespace-nowrap leading-none cursor-pointer">
                     Suiikala
                   </h1>
                 </div>
@@ -208,7 +207,7 @@ export function SiteNav() {
 
               <button
                 onClick={() => setOpen(false)}
-                className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 transition flex items-center justify-center shrink-0"
+                className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 hover:scale-110 transition-all flex items-center justify-center shrink-0"
               >
                 <X className="w-5 h-5 text-white" />
               </button>
@@ -234,7 +233,7 @@ export function SiteNav() {
                       key={n.to}
                       to={n.to}
                       onClick={() => setOpen(false)}
-                      className="group flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-5 py-4 text-white transition-all duration-300 hover:bg-[#D4AF37] hover:text-[#064E3B]"
+                      className="group flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-5 py-4 text-white transition-all duration-300 hover:bg-[#D4AF37] hover:text-[#064E3B] hover:scale-[1.02]"
                     >
                       <span className="text-lg font-medium">{n.label}</span>
                       <span className="text-lg opacity-50 group-hover:opacity-100 transition-transform group-hover:translate-x-1">→</span>
@@ -248,7 +247,7 @@ export function SiteNav() {
                 <Link
                   to="/cart"
                   onClick={() => setOpen(false)}
-                  className="block text-sm text-white/80 hover:text-[#D4AF37] transition"
+                  className="block text-sm text-white/80 hover:text-[#D4AF37] hover:scale-105 transition-all origin-left"
                 >
                   Shopping Bag {cartCount > 0 && `(${cartCount})`}
                 </Link>
@@ -256,7 +255,7 @@ export function SiteNav() {
                 <Link
                   to="/account/wishlist"
                   onClick={() => setOpen(false)}
-                  className="block text-sm text-white/80 hover:text-[#D4AF37] transition"
+                  className="block text-sm text-white/80 hover:text-[#D4AF37] hover:scale-105 transition-all origin-left"
                 >
                   Wishlist {wishlistCount > 0 && `(${wishlistCount})`}
                 </Link>
@@ -266,14 +265,14 @@ export function SiteNav() {
                     <Link
                       to="/account"
                       onClick={() => setOpen(false)}
-                      className="block text-sm text-white/80 hover:text-[#D4AF37] transition"
+                      className="block text-sm text-white/80 hover:text-[#D4AF37] hover:scale-105 transition-all origin-left"
                     >
                       My Account
                     </Link>
                     <Link
                       to="/account/orders"
                       onClick={() => setOpen(false)}
-                      className="block text-sm text-white/80 hover:text-[#D4AF37] transition"
+                      className="block text-sm text-white/80 hover:text-[#D4AF37] hover:scale-105 transition-all origin-left"
                     >
                       My Orders
                     </Link>
@@ -281,7 +280,7 @@ export function SiteNav() {
                       <Link
                         to="/admin"
                         onClick={() => setOpen(false)}
-                        className="block text-sm text-[#D4AF37] font-medium"
+                        className="block text-sm text-[#D4AF37] font-medium hover:scale-105 transition-all origin-left"
                       >
                         Admin Dashboard
                       </Link>
@@ -291,7 +290,7 @@ export function SiteNav() {
                         setOpen(false);
                         await signOut();
                       }}
-                      className="block text-left text-sm text-white/60 hover:text-[#D4AF37] transition"
+                      className="block text-left text-sm text-white/60 hover:text-[#D4AF37] hover:scale-105 transition-all origin-left"
                     >
                       Sign Out
                     </button>
@@ -300,7 +299,7 @@ export function SiteNav() {
                   <Link
                     to="/auth"
                     onClick={() => setOpen(false)}
-                    className="block text-sm text-white/80 hover:text-[#D4AF37] transition"
+                    className="block text-sm text-white/80 hover:text-[#D4AF37] hover:scale-105 transition-all origin-left"
                   >
                     Sign In
                   </Link>
@@ -308,7 +307,7 @@ export function SiteNav() {
 
                 <a
                   href="https://wa.me/"
-                  className="mt-4 block rounded-xl bg-[#D4AF37] px-5 py-3.5 text-center text-sm font-semibold text-[#064E3B] hover:opacity-95 transition shadow-sm"
+                  className="mt-4 block rounded-xl bg-[#D4AF37] px-5 py-3.5 text-center text-sm font-semibold text-[#064E3B] hover:opacity-95 hover:scale-[1.02] transition-all shadow-sm"
                 >
                   Chat on WhatsApp
                 </a>
@@ -323,7 +322,7 @@ export function SiteNav() {
 
 function Badge({ n }: { n: number }) {
   return (
-    <span className="absolute top-0 right-0 min-w-4 h-4 px-1 rounded-full bg-emerald-brand text-[9px] font-semibold text-cream grid place-items-center">
+    <span className="absolute top-0 right-0 min-w-4 h-4 px-1 rounded-full bg-[#D4AF37] text-[9px] font-semibold text-[#064E3B] grid place-items-center">
       {n}
     </span>
   );
